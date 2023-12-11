@@ -1,2 +1,2 @@
-# Data-VIs
- This is a final project for data visualization 
+# DataVis
+Final project for Data visualization
