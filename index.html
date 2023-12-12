@@ -4,11 +4,13 @@
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
 
+
 <!-- Color palette -->
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
 <!-- Create a div where the graph will take place -->
 <div id="my_dataviz"></div>
+<div id="radar"></div>
 
 <style>
 .node:hover{
@@ -28,6 +30,8 @@ var svg = d3.select("#my_dataviz")
     .attr("width", width)
     .attr("height", height);
 
+var typeNames = [];
+
 // Read data
 d3.csv("Chat.csv", function(data) {
 
@@ -38,8 +42,9 @@ d3.csv("Chat.csv", function(data) {
   });
 
   // Extracting type names for the color scale domain
-  var typeNames = [...new Set(data.map(d => d.name))];
+  typeNames = [...new Set(data.map(d => d.name))];
 
+  
   console.log(typeNames);
  
   var customColors = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#edc948', '#b07aa1',
@@ -170,8 +175,152 @@ node.call(d3.drag()
     .on("start", dragstarted)
     .on("drag", dragged)
     .on("end", dragended));
+});
+
+
+// Another chart of radar
+// set the dimensions and margins of the graph
+var width = 1000;
+var height = 1000;
+
+// append the svg object to the body of the page
+var radarsvg = d3.select("#radar")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.csv("data.csv", function(data) {
+
+    console.log(data);
+
+    let radatData = [];
+    data.forEach(function(d) {
+        radatData.push({
+            name: d.name,
+            hp: +d.hp,
+            attack: +d.attack,
+            defense: +d.defense,
+            sp_attack: +d.sp_attack,
+            sp_defense: +d.sp_defense,
+            speed: +d.speed,
+            total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
+        });
+    });
+    console.log(radatData);
+
+    let radialScale = d3.scaleLinear()
+        .domain([0,150])
+        .range([0,250]);//size of the circle
+
+    let ticks = [30,60,100,130,150];
+
+    var radarG = radarsvg.append("g")
+              .selectAll("circle")
+              .data(ticks)
+              .enter()
+              .append("circle")
+                .attr("cx", width / 2)
+                .attr("cy", height / 2)
+                .attr("fill", "none")
+                .attr("stroke", "gray")
+                .attr("r", function(d){ return radialScale(d); });
+
+    radarsvg.selectAll(".ticklabel")
+        .data(ticks)
+        .enter()
+        .append("text")
+        .attr("class", "ticklabel")
+        .attr("x", width / 2 + 5)
+        .attr("y", function(d) {
+            return height / 2 - radialScale(d) - 5; // Adjust the position for proper alignment
+        })
+        .style("font-size", "15px") // S
+        .text(function(d) {
+            return d.toString();
+        });
+
+    function angleToCoordinate(angle, value){
+      let x = Math.cos(angle) * radialScale(value);
+      let y = Math.sin(angle) * radialScale(value);
+      return {"x": width / 2 + x, "y": height / 2 - y};
+    }
+
+    // Assuming your six attributes are in this order: ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"]
+    let attributeOrder = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"];
+
+    // Modify the featureData mapping to use the attributeOrder
+    let featureData = attributeOrder.map((attribute, i) => {
+        let angle = (Math.PI / 2) + (2 * Math.PI * i / attributeOrder.length);
+        return {
+            "name": attribute,
+            "angle": angle,
+            "line_coord": angleToCoordinate(angle, 10),
+            "label_coord": angleToCoordinate(angle, 10.5)
+        };
+    });
+
+  // Rest of your code remains the same
+  // draw axis line
+  radarsvg.selectAll("line")
+      .data(featureData)
+      .enter().append("line")
+      .attr("x1", width / 2)
+      .attr("y1", height / 2)
+      .attr("x2", d => d.line_coord.x)
+      .attr("y2", d => d.line_coord.y)
+      .attr("stroke","black");
+
+  // draw axis label
+  radarsvg.selectAll(".axislabel")
+      .data(featureData)
+      .enter()
+      .append("text")
+      .attr("x", d => d.label_coord.x)
+      .attr("y", d => d.label_coord.y)
+      .text(d => d.name);
+  // Define the maximum value for your data (you can adjust this based on your data)
+let maxValue = 150;
+
+// Create a scale for mapping data values to the radial positions
+let dataScale = d3.scaleLinear()
+    .domain([0, maxValue])
+    .range([0, radialScale(maxValue)]);
+
+// Create a function to convert data values to coordinates on the radar chart
+function dataToCoordinates(data) {
+    return featureData.map((attribute) => {
+        let angle = attribute.angle;
+        let radius = dataScale(data[attribute.name]);
+        return angleToCoordinate(angle, radius);
+    });
+}
+
+// Assuming you have a data point like this (replace it with your actual data structure)
+let dataPoint = {
+    name: "Bulbasaur", // Replace with the name of the Pokemon
+    hp: 45, // Replace with the actual HP value
+    attack: 49, // Replace with the actual Attack value
+    defense: 49, // Replace with the actual Defense value
+    sp_attack: 65, // Replace with the actual Special Attack value
+    sp_defense: 65, // Replace with the actual Special Defense value
+    speed: 45 // Replace with the actual Speed value
+};
+
+// Convert the data point to coordinates
+let dataCoordinates = dataToCoordinates(dataPoint);
+
+// Draw the radar chart using the dataCoordinates
+radarsvg.append("polygon")
+    .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
+    .attr("stroke", "blue") // Adjust the stroke color
+    .attr("fill", "rgba(0, 0, 255, 0.5)"); // Adjust the fill color
+
 
 
 });
 
+
+
+
 </script>
+
