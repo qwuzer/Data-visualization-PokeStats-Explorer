@@ -209,8 +209,8 @@ d3.csv("data.csv", function(data) {
     console.log(radatData);
 
     let radialScale = d3.scaleLinear()
-        .domain([0,150])
-        .range([0,250]);//size of the circle
+        .domain([0,100])
+        .range([0,150]);//size of the circle
 
     let ticks = [30,60,90,120,150];
 
@@ -259,6 +259,8 @@ d3.csv("data.csv", function(data) {
         };
     });
 
+    console.log(featureData);
+
   // Rest of your code remains the same
   // draw axis line
   radarsvg.selectAll("line")
@@ -290,7 +292,8 @@ let dataScale = d3.scaleLinear()
 function dataToCoordinates(data) {
     return featureData.map((attribute) => {
         let angle = attribute.angle;
-        let radius = dataScale(data[attribute.name]);
+        // let radius = dataScale(data[attribute.name]);
+        let radius = data[attribute.name]
         return angleToCoordinate(angle, radius);
     });
 }
@@ -298,7 +301,7 @@ function dataToCoordinates(data) {
 // Assuming you have a data point like this (replace it with your actual data structure)
 let dataPoint = {
     name: "Bulbasaur", // Replace with the name of the Pokemon
-    hp: 45, // Replace with the actual HP value
+    hp: 30, // Replace with the actual HP value
     attack: 49, // Replace with the actual Attack value
     defense: 49, // Replace with the actual Defense value
     sp_attack: 65, // Replace with the actual Special Attack value
@@ -313,7 +316,8 @@ let dataCoordinates = dataToCoordinates(dataPoint);
 radarsvg.append("polygon")
     .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
     .attr("stroke", "blue") // Adjust the stroke color
-    .attr("fill", "rgba(0, 0, 255, 0.5)"); // Adjust the fill color
+    .attr("fill", "rgba(0, 0, 255, 0.5)") // Adjust the fill color
+    .attr("opacity", 0.8); // Adjust the opacity
 
 
 
