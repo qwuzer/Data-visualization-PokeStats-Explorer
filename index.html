@@ -212,7 +212,7 @@ d3.csv("data.csv", function(data) {
         .domain([0,150])
         .range([0,250]);//size of the circle
 
-    let ticks = [30,60,100,130,150];
+    let ticks = [30,60,90,120,150];
 
     var radarG = radarsvg.append("g")
               .selectAll("circle")
@@ -254,8 +254,8 @@ d3.csv("data.csv", function(data) {
         return {
             "name": attribute,
             "angle": angle,
-            "line_coord": angleToCoordinate(angle, 10),
-            "label_coord": angleToCoordinate(angle, 10.5)
+            "line_coord": angleToCoordinate(angle, 150),
+            "label_coord": angleToCoordinate(angle, 170)
         };
     });
 
