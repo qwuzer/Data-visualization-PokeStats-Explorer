@@ -317,6 +317,45 @@ radarsvg.append("polygon")
     .attr("fill", "rgba(0, 0, 255, 0.5)") // Adjust the fill color
     .attr("opacity", 0.8); // Adjust the opacity
 
+});
+// append the svg object to the body of the page
+var selectsvg = d3.select("#select_svg")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+d3.csv("All_Pokemon.csv").then(function(data) {
+  // 選擇下拉式選單
+  var selectMenu = d3.select("#dropdown")
+      .on("change", function() {
+      // 獲取選擇的值
+      var selectedValue = d3.select(this).property("value");
 
+      // 獲取當前選擇的 option 元素
+      var selectedOption = d3.select(this).select("option:checked");
 
+      // 獲取當前選擇的 option 的文字內容
+      var selectedText = selectedOption.text();
+
+      // 在這裡執行相應的操作，例如更新視覺化或其他處理
+      // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
+      console.log("Selected Value: " + selectedValue);
+      console.log("Selected Text: " + selectedText);
+    })
+  
+  
+    // 使用 Map 來存儲每個 Number 的第一筆資料
+  var firstDataMap = new Map();
+  // 過濾數據，只保留每個 Number 的第一筆資料
+  data.forEach(function(d) {
+      if (!firstDataMap.has(d.Number)) {
+          firstDataMap.set(d.Number, d);
+      }
+  });
+  // 將過濾後的資料填充到下拉式選單中
+  firstDataMap.forEach(function(value, key) {
+      selectMenu.append("option")
+          .attr("value", value.Number)
+          .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
+  });
+  
 });
