@@ -187,145 +187,212 @@ var radarsvg = d3.select("#radar")
     .attr("width", width)
     .attr("height", height);
 
-d3.csv("data.csv").then(function (data) {
 
-    console.log(data);
+function draw_radar(name)
+{
+  d3.csv("data.csv").then(function (data) {
+      console.log(data);
 
-    let radatData = [];
-    data.forEach(function(d) {
-        radatData.push({
-            name: d.name,
-            hp: +d.hp,
-            attack: +d.attack,
-            defense: +d.defense,
-            sp_attack: +d.sp_attack,
-            sp_defense: +d.sp_defense,
-            speed: +d.speed,
-            total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
-        });
-    });
-    console.log(radatData);
+      let radatData = [];
+      data.forEach(function(d) {
+          radatData.push({
+              name: d.name,
+              hp: +d.hp,
+              attack: +d.attack,
+              defense: +d.defense,
+              sp_attack: +d.sp_attack,
+              sp_defense: +d.sp_defense,
+              speed: +d.speed,
+              total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
+          });
+      });
+      console.log("radarData"+radatData);
 
-    let radialScale = d3.scaleLinear()
-        .domain([0,100])
-        .range([0,150]);//size of the circle
+      let radialScale = d3.scaleLinear()
+          .domain([0,100])
+          .range([0,150]);//size of the circle
 
-    let ticks = [30,60,90,120,150];
+      let ticks = [30,60,90,120,150];
 
-    var radarG = radarsvg.append("g")
-              .selectAll("circle")
-              .data(ticks)
-              .enter()
-              .append("circle")
+      var radarG = radarsvg.append("g")
+                .selectAll("circle")
+                .data(ticks)
+                .enter()
+                .append("circle")
                 .attr("cx", width / 2)
                 .attr("cy", height / 2)
                 .attr("fill", "none")
                 .attr("stroke", "gray")
                 .attr("r", function(d){ return radialScale(d); });
 
-    radarsvg.selectAll(".ticklabel")
-        .data(ticks)
+      radarsvg.selectAll(".ticklabel")
+          .data(ticks)
+          .enter()
+          .append("text")
+          .attr("class", "ticklabel")
+          .attr("x", width / 2 + 5)
+          .attr("y", function(d) {
+              return height / 2 - radialScale(d) - 5; // Adjust the position for proper alignment
+          })
+          .style("font-size", "15px") // S
+          .text(function(d) {
+              return d.toString();
+          });
+
+      function angleToCoordinate(angle, value){
+        let x = Math.cos(angle) * radialScale(value);
+        let y = Math.sin(angle) * radialScale(value);
+        return {"x": width / 2 + x, "y": height / 2 - y};
+      }
+
+      // Assuming your six attributes are in this order: ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"]
+      let attributeOrder = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"];
+
+      // Modify the featureData mapping to use the attributeOrder
+      let featureData = attributeOrder.map((attribute, i) => {
+          let angle = (Math.PI / 2) + (2 * Math.PI * i / attributeOrder.length);
+          return {
+              "name": attribute,
+              "angle": angle,
+              "line_coord": angleToCoordinate(angle, 150),
+              "label_coord": angleToCoordinate(angle, 170)
+          };
+      });
+
+      console.log(featureData);
+
+    // Rest of your code remains the same
+    // draw axis line
+    radarsvg.selectAll("line")
+        .data(featureData)
+        .enter().append("line")
+        .attr("x1", width / 2)
+        .attr("y1", height / 2)
+        .attr("x2", d => d.line_coord.x)
+        .attr("y2", d => d.line_coord.y)
+        .attr("stroke","black");
+
+    // draw axis label
+    radarsvg.selectAll(".axislabel")
+        .data(featureData)
         .enter()
         .append("text")
-        .attr("class", "ticklabel")
-        .attr("x", width / 2 + 5)
-        .attr("y", function(d) {
-            return height / 2 - radialScale(d) - 5; // Adjust the position for proper alignment
-        })
-        .style("font-size", "15px") // S
-        .text(function(d) {
-            return d.toString();
-        });
+        .attr("x", d => d.label_coord.x)
+        .attr("y", d => d.label_coord.y)
+        .text(d => d.name);
+    // Define the maximum value for your data (you can adjust this based on your data)
+  let maxValue = 150;
 
-    function angleToCoordinate(angle, value){
-      let x = Math.cos(angle) * radialScale(value);
-      let y = Math.sin(angle) * radialScale(value);
-      return {"x": width / 2 + x, "y": height / 2 - y};
-    }
+  // Create a scale for mapping data values to the radial positions
+  let dataScale = d3.scaleLinear()
+      .domain([0, maxValue])
+      .range([0, radialScale(maxValue)]);
 
-    // Assuming your six attributes are in this order: ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"]
-    let attributeOrder = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"];
-
-    // Modify the featureData mapping to use the attributeOrder
-    let featureData = attributeOrder.map((attribute, i) => {
-        let angle = (Math.PI / 2) + (2 * Math.PI * i / attributeOrder.length);
-        return {
-            "name": attribute,
-            "angle": angle,
-            "line_coord": angleToCoordinate(angle, 150),
-            "label_coord": angleToCoordinate(angle, 170)
-        };
+  // Create a function to convert data values to coordinates on the radar chart
+  function dataToCoordinates(data) {
+      return featureData.map((attribute) => {
+          let angle = attribute.angle;
+          // let radius = dataScale(data[attribute.name]);
+          let radius = data[attribute.name]
+          return angleToCoordinate(angle, radius);
+      });
+  }
+  d3.csv("All_Pokemon.csv").then(function (data) {
+    radarsvg.selectAll("polygon").remove();
+    let radatData = [];
+    let MyType;
+    console.log(name);
+    data.forEach(function(d) {
+        if(d.Name == name) {
+            MyType = d.Type1;
+            radatData.push({
+                name: d.Name,
+                hp: +d.HP,
+                attack: +d.Att,
+                defense: +d.Def,
+                sp_attack: +d.Spa,
+                sp_defense: +d.Spd,
+                speed: +d.Spe,
+                total: +d.Att + +d.HP + +d.Def + +d.Spa + +d.Spd + +d.Spe
+            });
+        }
     });
+    let fillColor;
+    switch (MyType) {
+      case "Grass":
+          fillColor = "darkgreen";
+          break;
+      case "Fire":
+          fillColor = "red";
+          break;
+      case "Water":
+          fillColor = "darkblue";
+          break;
+      case "Normal":
+          fillColor = "gray";
+          break;
+      case "Ground":
+          fillColor = "saddlebrown";
+          break;
+      case "Bug":
+          fillColor = "limegreen";
+          break;
+      case "Rock":
+          fillColor = "burlywood";
+          break;
+      case "Electric":
+          fillColor = "yellow";
+          break;
+      case "Ice":
+          fillColor = "lightblue";
+          break;
+      case "Steel":
+          fillColor = "teal";
+          break;
+      case "Poison":
+          fillColor = "purple";
+          break;
+      case "Flying":
+          fillColor = "lightskyblue";
+          break;
+      case "Ghost":
+          fillColor = "dimgray";
+          break;
+      case "Dark":
+          fillColor = "darkpurple";
+          break;
+      case "Fairy":
+          fillColor = "lightpink";
+          break;
+      case "Psychic":
+          fillColor = "deeppink";
+          break;
+      case "Dragon":
+          fillColor = "indigo";
+          break;
+      default:
+          fillColor = "blue"; // Default color
+  }
+    let dataCoordinates = dataToCoordinates(radatData[0]);
+    radatData.forEach(function (d) {
+      console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
+  });
+    // Draw the radar chart using the dataCoordinates
+    radarsvg.append("polygon")
+      .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
+      .attr("stroke", "blue") // Adjust the stroke color
+      .attr("fill", fillColor) // Adjust the fill color
+      .attr("opacity", 0.6); // Adjust the opacity
+});
 
-    console.log(featureData);
-
-  // Rest of your code remains the same
-  // draw axis line
-  radarsvg.selectAll("line")
-      .data(featureData)
-      .enter().append("line")
-      .attr("x1", width / 2)
-      .attr("y1", height / 2)
-      .attr("x2", d => d.line_coord.x)
-      .attr("y2", d => d.line_coord.y)
-      .attr("stroke","black");
-
-  // draw axis label
-  radarsvg.selectAll(".axislabel")
-      .data(featureData)
-      .enter()
-      .append("text")
-      .attr("x", d => d.label_coord.x)
-      .attr("y", d => d.label_coord.y)
-      .text(d => d.name);
-  // Define the maximum value for your data (you can adjust this based on your data)
-let maxValue = 150;
-
-// Create a scale for mapping data values to the radial positions
-let dataScale = d3.scaleLinear()
-    .domain([0, maxValue])
-    .range([0, radialScale(maxValue)]);
-
-// Create a function to convert data values to coordinates on the radar chart
-function dataToCoordinates(data) {
-    return featureData.map((attribute) => {
-        let angle = attribute.angle;
-        // let radius = dataScale(data[attribute.name]);
-        let radius = data[attribute.name]
-        return angleToCoordinate(angle, radius);
-    });
+  });
+  // Convert the data point to coordinates
+  
 }
 
-// Assuming you have a data point like this (replace it with your actual data structure)
-let dataPoint = {
-    name: "Bulbasaur", // Replace with the name of the Pokemon
-    hp: 30, // Replace with the actual HP value
-    attack: 49, // Replace with the actual Attack value
-    defense: 49, // Replace with the actual Defense value
-    sp_attack: 65, // Replace with the actual Special Attack value
-    sp_defense: 65, // Replace with the actual Special Defense value
-    speed: 45 // Replace with the actual Speed value
-};
-
-// Convert the data point to coordinates
-let dataCoordinates = dataToCoordinates(dataPoint);
-
-// Draw the radar chart using the dataCoordinates
-radarsvg.append("polygon")
-    .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
-    .attr("stroke", "blue") // Adjust the stroke color
-    .attr("fill", "rgba(0, 0, 255, 0.5)") // Adjust the fill color
-    .attr("opacity", 0.8); // Adjust the opacity
-
-});
-// append the svg object to the body of the page
-var selectsvg = d3.select("#select_svg")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
 d3.csv("All_Pokemon.csv").then(function(data) {
   // 選擇下拉式選單
-  var selectMenu = d3.select("#dropdown")
+      var selectMenu = d3.select("#dropdown")
       .on("change", function() {
       // 獲取選擇的值
       var selectedValue = d3.select(this).property("value");
@@ -335,14 +402,39 @@ d3.csv("All_Pokemon.csv").then(function(data) {
 
       // 獲取當前選擇的 option 的文字內容
       var selectedText = selectedOption.text();
-
+      var selectedName = selectedText.split(' ')[1];
       // 在這裡執行相應的操作，例如更新視覺化或其他處理
       // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
       console.log("Selected Value: " + selectedValue);
       console.log("Selected Text: " + selectedText);
-    })
-  
-  
+      draw_radar(selectedName);
+      updateImages(selectedName);
+      });
+      selectMenu.style("position", "absolute")
+            .style("left", "0px")
+            .style("top", "1000px");
+
+    // 更新图片的函数
+  function updateImages(name) 
+  {
+    var lowercaseName = name.toLowerCase();
+    console.log(name);
+    console.log(typeof name);
+    
+    var imageContainer = document.getElementById("imageContainer")
+    var imagePath = "images/";
+    imageContainer.style.position = "absolute";
+    imageContainer.style.left = "400px";  // 設定水平座標
+    imageContainer.style.top = "1000px";    // 設定垂直座標
+
+    // 清空之前的图片
+    imageContainer.innerHTML = "";
+    var img = document.createElement("img");
+    img.src = imagePath + lowercaseName+".png";
+    img.alt = "Image";
+    img.width = 200;
+    imageContainer.appendChild(img);
+  }
     // 使用 Map 來存儲每個 Number 的第一筆資料
   var firstDataMap = new Map();
   // 過濾數據，只保留每個 Number 的第一筆資料
