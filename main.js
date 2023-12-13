@@ -443,7 +443,11 @@ d3.csv("All_Pokemon.csv").then(function(data) {
           firstDataMap.set(d.Number, d);
       }
   });
+  var first=1;
   // 將過濾後的資料填充到下拉式選單中
+  selectMenu.append("option")
+          .attr("value", 0)
+          .text(function(d) { return "choose your pokemon" });
   firstDataMap.forEach(function(value, key) {
       selectMenu.append("option")
           .attr("value", value.Number)
