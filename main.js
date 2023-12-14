@@ -412,7 +412,7 @@ d3.csv("All_Pokemon.csv").then(function(data) {
       });
       selectMenu.style("position", "absolute")
             .style("left", "0px")
-            .style("top", "1000px");
+            .style("top", "2000px");
 
     // 更新图片的函数
   function updateImages(name) 
@@ -425,7 +425,7 @@ d3.csv("All_Pokemon.csv").then(function(data) {
     var imagePath = "images/";
     imageContainer.style.position = "absolute";
     imageContainer.style.left = "400px";  // 設定水平座標
-    imageContainer.style.top = "1000px";    // 設定垂直座標
+    imageContainer.style.top = "2000px";    // 設定垂直座標
 
     // 清空之前的图片
     imageContainer.innerHTML = "";
@@ -455,3 +455,80 @@ d3.csv("All_Pokemon.csv").then(function(data) {
   });
   
 });
+//stackbarchart
+var svg_stackbar = d3.select("#stackbar")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+   
+    d3.csv("All_Pokemon.csv").then(function(data) {
+      // Filter and map the CSV data to the desired format
+      var pokemonData = data
+          .filter(function(d) {
+              return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
+          })
+          .map(function(d) {
+              return {
+                  index:d.Number, 
+                  name: d.Name,
+                  hp: +d.HP,
+                  attack: +d.Att,
+                  defense: +d.Def,
+                  sp_attack: +d.Spa,
+                  sp_defense: +d.Spd,
+                  speed: +d.Spe
+              };
+          });
+  
+      console.log(pokemonData);
+      // Now pokemonData is in the desired format
+      draw_stackbar(pokemonData);
+  });
+// Set up chart dimensions
+function draw_stackbar(pokemonData)
+{
+
+// Set up scales and axes
+var x = d3.scaleBand()
+    .domain(pokemonData.map(function (d) { return d.name; }))
+    .range([0, width-50])
+    .padding(0.5);
+
+var y = d3.scaleLinear()
+    .domain([0, d3.max(pokemonData, function (d) { return d.hp + d.attack + d.defense + d.sp_attack + d.sp_defense + d.speed; })])
+    .range([height/2, 0]);
+
+var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+// Stack the data
+var stack = d3.stack()
+    .keys(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone);
+
+var stackedData = stack(pokemonData);
+
+// Draw the bars
+var barchart = svg_stackbar.selectAll("g")
+    .data(stackedData)
+    .enter().append("g")
+    .attr("fill", function (d) { return color(d.key); })
+    .selectAll("rect")
+    .data(function (d) { return d; })
+    .enter().append("rect")
+    .attr("x", function (d) { return x(d.data.name); })
+    .attr("y", function (d) { return y(d[1]); })
+    .attr("height", function (d) { return y(d[0]) - y(d[1]); })
+    .attr("width", x.bandwidth());
+
+
+// Add axes
+svg_stackbar.append("g")
+    .attr("transform", "translate(0," + height/2 + ")")
+    .call(d3.axisBottom(x));
+
+svg_stackbar.append("g")
+    .call(d3.axisLeft(y));
+
+}
+  
