@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .label {
+            fill: #000;
+            font: 12px sans-serif;
+            text-anchor: middle;
+        }
+        .axis-label {
+            fill: #000;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .legend {
+            font-family: sans-serif;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <svg width="1200" height="600"></svg> <!-- 增加SVG的寬度以適應Y軸標籤 -->
+    <script>
+        var margin = {top: 20, right: 180, bottom: 60, left: 100}, // 增加左側和底部的邊距
+            width = +d3.select("svg").attr("width") - margin.left - margin.right,
+            height = +d3.select("svg").attr("height") - margin.top - margin.bottom;
+
+        var svg = d3.select("svg").append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("All_Pokemon.csv").then(function(data) {
+            // 創建一個類型到顏色的映射
+            var typeColorMap = {};
+            var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+            data.forEach(function(d) {
+                d.weight = +d.Weight;
+                d.height = +d.Height;
+                typeColorMap[d["Type 1"]] = color(d["Type 1"]);
+            });
+
+            // 比例尺和軸的設定
+            var x = d3.scaleLinear().domain([0, d3.max(data, d => d.weight)]).range([0, width]);
+            var y = d3.scaleLinear().domain([0, d3.max(data, d => d.height)]).range([height, 0]);
+
+            // 繪製點
+            svg.selectAll(".dot")
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "dot")
+                .attr("r", 3.5)
+                .attr("cx", d => x(d.weight))
+                .attr("cy", d => y(d.height))
+                .style("fill", d => typeColorMap[d["Type 1"]]);
+
+
+            // 添加X軸和標籤
+            var xAxisGroup = svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+            
+            xAxisGroup.append("text")
+                .attr("class", "axis-label")
+                .attr("x", width / 2)
+                .attr("y", 40) // 調整Y軸標籤的位置
+                .text("Weight (kg)");
+
+            // 添加Y軸和標籤
+            var yAxisGroup = svg.append("g")
+                .call(d3.axisLeft(y));
+            
+            yAxisGroup.append("text")
+                .attr("class", "axis-label")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -margin.left + 20) // 調整X軸標籤的位置
+                .attr("x", -height / 2)
+                .attr("dy", "1em")
+                .text("Height (m)");
+
+            // 添加圖例
+            var legend = svg.selectAll(".legend")
+                .data(Object.keys(typeColorMap))
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+            // 繪製圖例的色塊
+            legend.append("rect")
+                .attr("x", width + margin.right - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", d => typeColorMap[d]);
+
+            // 添加圖例的文字
+            legend.append("text")
+                .attr("x", width + margin.right - 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(d => d);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
