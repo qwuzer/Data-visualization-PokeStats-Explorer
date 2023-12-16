@@ -1,3 +1,12 @@
+// function smoothScroll(target) {
+//   var section = document.querySelector(target);
+//   var sectionRect = section.getBoundingClientRect();
+//   var offsetTop = sectionRect.top + window.scrollY;
+
+//   // Set the transform property to scroll smoothly
+//   document.getElementById('circular_packing').style.transform = 'translateY(-' + offsetTop + 'px)';
+// }
+
 // set the dimensions and margins of the graph
 var width = 1000;
 var height = 1000;
@@ -7,7 +16,6 @@ var svg = d3.select("#circular_packing")
   .append("svg")
     .attr("width", width)
     .attr("height", height);
-
 
 var Tooltip = d3.select("body")
   .append("div")
@@ -20,7 +28,53 @@ var Tooltip = d3.select("body")
   .style("border-radius", "5px")
   .style("padding", "5px");
 
+  
 d3.csv("data.csv").then(function (data) {
+  var generations = [1, 2, 3, 4, 5, 6, 7];
+  var generationSelection = svg.append("g")
+    .attr("id", "generation-selection")
+    .attr("transform", "translate(100, 400)");
+
+  var boxWidth = 40;
+  var boxHeight = 40;
+
+  var generationBoxes = generationSelection.selectAll(".generation-box")
+    .data(generations)
+    .enter()
+    .append("rect")
+    .attr("class", "generation-box")
+    .attr("id", function (d, i) { return i + 1;})// Set the id of each box to the generation number
+    .attr("x", 0) 
+    .attr("y", function (d, i) { return i * boxHeight; }) 
+    .attr("width", boxWidth) 
+    .attr("height", boxHeight) 
+    .style("fill", "lightgray") 
+    .style("stroke", "black")
+    .style("opacity", 0.5) // Set the initial opacity
+    .on("click", function (event, d) {
+      var genBox = d3.select(this);
+      var isSelected = genBox.classed("selected");
+
+      generationBoxes.style("opacity", 0.5);  
+      if (!isSelected) {
+          genBox.style("opacity", 1);
+
+          var genNumber = genBox.attr("id");
+          node.style("fill-opacity", function (nodeData) {
+              return nodeData.generation === +genNumber ? 1 : 0.3;
+          });
+          
+      
+          generationBoxes.classed("selected", false);
+          genBox.classed("selected", true);
+      } else {
+          // Reset settings
+          node.style("fill-opacity", 0.8);
+          genBox.classed("selected", false);
+      }
+    });
+  
+
   var types = [...new Set(data.flatMap(d => [d.type1, d.type2].filter(t => t !== '' && t !== undefined)))];
 
   // Create an array of unique generations (1-7)
@@ -44,15 +98,6 @@ d3.csv("data.csv").then(function (data) {
   var typeNames = [...new Set(result.map(d => d.type))];
 
   console.log(typeNames);
-
-  var customColors = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#edc948', '#b07aa1',
-    '#393b79', '#ff9da7', '#9c755f', '#bab0ac', '#a6761d', '#1f78b4',
-    '#2ca02c', '#9467bd', '#d62728', '#7fc97f', '#beaed4', '#59a14f',
-    '#cfa0cd', '#66c2a5'];
-
-  var color = d3.scaleOrdinal()
-    .domain(typeNames)
-    .range(customColors);
 
   // Size scale for bubbles
   var size = d3.scaleLinear()
@@ -124,6 +169,8 @@ d3.csv("data.csv").then(function (data) {
     .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
     .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted to each other if the value is > 0
     .force("collide", d3.forceCollide().strength(.2).radius(function (d) { return (size(d.number) + 3); }).iterations(1)); // Force that avoids circle overlapping
+    // .force("attractToCenter", attractToCenter); // Add the custom force
+
 
   // Apply these forces to the nodes and update their positions.
   // Once the force algorithm is happy with positions ('alpha' value is low enough), simulations will stop.
@@ -179,6 +226,7 @@ d3.csv("data.csv").then(function (data) {
     Tooltip
       .style("opacity", 0);
   }
+
 });
 
 // append the svg object to the body of the page
@@ -245,7 +293,6 @@ function draw_radar(name)
         return {"x": width / 2 + x, "y": height / 2 - y};
       }
 
-      // Assuming your six attributes are in this order: ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"]
       let attributeOrder = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"];
 
       // Modify the featureData mapping to use the attributeOrder
@@ -297,6 +344,7 @@ function draw_radar(name)
           return angleToCoordinate(angle, radius);
       });
   }
+
   d3.csv("All_Pokemon.csv").then(function (data) {
     radarsvg.selectAll("polygon").remove();
     let radatData = [];
@@ -373,10 +421,13 @@ function draw_radar(name)
       default:
           fillColor = "blue"; // Default color
   }
-    let dataCoordinates = dataToCoordinates(radatData[0]);
-    radatData.forEach(function (d) {
+
+  let dataCoordinates = dataToCoordinates(radatData[0]);
+
+  radatData.forEach(function (d) {
       console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
   });
+
     // Draw the radar chart using the dataCoordinates
     radarsvg.append("polygon")
       .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
@@ -408,7 +459,7 @@ d3.csv("All_Pokemon.csv").then(function(data) {
       console.log("Selected Value: " + selectedValue);
       console.log("Selected Text: " + selectedText);
       draw_radar(selectedName);
-      updateImages(selectedName);
+          updateImages(selectedName);
       });
       selectMenu.style("position", "absolute")
             .style("left", "0px")
@@ -454,4 +505,131 @@ d3.csv("All_Pokemon.csv").then(function(data) {
           .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
   });
   
+});
+
+
+var margin = { top: 10, right: 10, bottom: 30, left: 30 };
+    scatterWidth = 1000 - margin.left - margin.right;
+    scatterHeight = 1000 - margin.top - margin.bottom;
+
+var scattersvg = d3.select("#scatter")
+  .append("svg")
+    .attr("width", scatterWidth)
+    .attr("height", scatterHeight)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("All_Pokemon.csv").then(function (data) {
+  // Create a type-to-color mapping
+  var typeColorMap = {};
+  var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+  data.forEach(function (d) {
+    d.weight = +d.Weight;
+    d.height = +d.Height;
+    typeColorMap[d["Type1"]] = color(d["Type1"]);
+  });
+
+  // Scale and axis setup
+  var x = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.weight)])
+    .range([0, scatterWidth - 50 ]);
+
+  var xaxis = scattersvg.append("g")
+    .attr("transform", "translate(0," + (scatterHeight - 50) + ")")
+    .call(d3.axisBottom(x));
+
+  var y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.height)])
+    .range([scatterHeight - 50 , 0]);
+
+  var yaxis = scattersvg.append("g")
+    .call(d3.axisLeft(y));
+
+  // Add legend
+  var legend = scattersvg.selectAll(".legend")
+  .data(Object.keys(typeColorMap))
+  .enter().append("g")
+  .attr("class", "legend")
+  .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+  // Draw legend color blocks
+  legend.append("rect")
+    .attr("x", scatterWidth - margin.right - 38)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", d => typeColorMap[d]);
+
+  // Add legend text
+  legend.append("text")
+    .attr("x", scatterWidth - margin.right - 44)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text(d => d);
+
+  // // Add a clipPath: everything out of this area won't be drawn.
+  // var clip = scattersvg.append("defs").append("svg:clipPath")
+  //   .attr("id", "clip")
+  //   .append("svg:rect")
+  //   .attr("width", scatterWidth )
+  //   .attr("height", scatterHeight  )
+  //   .attr("x", 0)
+  //   .attr("y", 0);
+  
+  // scattersvg.attr("clip-path", "url(#clip)");
+
+   // Draw points
+   var dots = scattersvg.selectAll(".dot")
+   .data(data)
+   .enter().append("circle")
+   .attr("class", "dot")
+   .attr("r", 3.5)
+   .attr("cx", d => x(d.weight))
+   .attr("cy", d => y(d.height))
+   .attr("name", d => d.Number)
+   .style("fill", d => typeColorMap[d["Type1"]]);
+
+  // Add brushing and zooming
+  var brush = d3.brush()
+    .extent([[0, 0], [scatterWidth , scatterHeight - 51]])
+    .on("end", updateChart);
+
+
+  scattersvg.append("g")
+    .attr("class", "brush")
+    .call(brush);
+
+  var idleTimeout;
+  function idled() { idleTimeout = null; }
+
+  function updateChart( event ) {
+    var extent = event.selection;
+
+    console.log(extent)
+    // If no selection, back to the initial coordinate. Otherwise, update X axis domain
+    if (!extent) {
+      if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
+      x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
+      y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
+      console.log('hi')
+    } else {
+      x.domain([x.invert(extent[0][0]), x.invert(extent[1][1])]);
+      y.domain([y.invert(extent[1][1]), y.invert(extent[0][0])]);
+      scattersvg.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
+    }
+  
+    // Update axis and circle position
+    xaxis.transition().duration(1000).call(d3.axisBottom(x));
+    yaxis.transition().duration(1000).call(d3.axisLeft(y));
+    scattersvg.selectAll(".dot")
+      .transition().duration(1000)
+      .attr("cx", function (d) { return x(d.weight); })
+      .attr("cy", function (d) { return y(d.height); });
+  }
+  
+
+
+
+
 });
