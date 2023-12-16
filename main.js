@@ -463,7 +463,7 @@ d3.csv("All_Pokemon.csv").then(function(data) {
       });
       selectMenu.style("position", "absolute")
             .style("left", "0px")
-            .style("top", "2000px");
+            .style("top", "1020px");
 
     // 更新图片的函数
   function updateImages(name) 
@@ -476,7 +476,7 @@ d3.csv("All_Pokemon.csv").then(function(data) {
     var imagePath = "images/";
     imageContainer.style.position = "absolute";
     imageContainer.style.left = "400px";  // 設定水平座標
-    imageContainer.style.top = "2000px";    // 設定垂直座標
+    imageContainer.style.top = "1000px";    // 設定垂直座標
 
     // 清空之前的图片
     imageContainer.innerHTML = "";
