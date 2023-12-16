@@ -1,0 +1,21 @@
+/* styles.css */
+
+body {
+    margin: 0; /* Remove default margin */
+    background-size: cover;
+    background-position: center;
+    background-image: url('bg.png'); /* Replace with the actual path to your image */
+}
+
+
+#circular_packing {
+    background-image: url('bg.png'); /* Replace with the actual path to your image */
+}
+
+#radar {
+    background-size: cover;
+    background-position: center;
+    height: 1000px; /* Set an appropriate height */
+    transition: transform 0.5s ease-in-out; /* Add smooth transition */
+    background-image: url('https://c4.wallpaperflare.com/wallpaper/121/449/307/pokemon-cartoon-minimalist-pokeball-wallpaper-thumb.jpg'); /* Replace with the actual path to your image */
+}
