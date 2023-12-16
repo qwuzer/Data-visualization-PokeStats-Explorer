@@ -633,3 +633,135 @@ d3.csv("All_Pokemon.csv").then(function (data) {
 
 
 });
+
+
+//stackbarchart
+var svg_stackbar = d3.select("#stackbar")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+   
+    d3.csv("All_Pokemon.csv").then(function(data) {
+      // Filter and map the CSV data to the desired format
+      var pokemonData = data
+          .filter(function(d) {
+              return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
+          })
+          .map(function(d) {
+              return {
+                  index:d.Number, 
+                  name: d.Name,
+                  hp: +d.HP,
+                  attack: +d.Att,
+                  defense: +d.Def,
+                  sp_attack: +d.Spa,
+                  sp_defense: +d.Spd,
+                  speed: +d.Spe
+              };
+          });
+  
+      console.log(pokemonData);
+      // Now pokemonData is in the desired format
+      draw_stackbar(pokemonData);
+  });
+// Set up chart dimensions
+function draw_stackbar(pokemonData)
+{
+
+// Set up scales and axes
+var x = d3.scaleBand()
+    .domain(pokemonData.map(function (d) { return d.name; }))
+    .range([0, 750])  // 修改范围
+    .padding(0.5);
+
+var y = d3.scaleLinear()
+    .domain([0, d3.max(pokemonData, function (d) { return d.hp + d.attack + d.defense + d.sp_attack + d.sp_defense + d.speed; })])
+    .range([height/2, 0]);
+    
+
+var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+// Stack the data
+var stack = d3.stack()
+    .keys(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone);
+
+var stackedData = stack(pokemonData);
+
+// 创建颜色比例尺，将每个属性映射到一个颜色
+var colorScale = d3.scaleOrdinal()
+    .domain(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
+    .range(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
+
+var color = function(d) { return colorScale(d.key); };
+
+
+// Draw the bars
+var barchart = svg_stackbar.selectAll("g")
+    .data(stackedData)
+    .enter().append("g")
+    .attr("fill",color)
+    .selectAll("rect")
+    .data(function (d) { return d; })
+    .enter().append("rect")
+    .attr("x", function (d) { return x(d.data.name); })
+    .attr("y", function (d) { return y(d[1]); })
+    .attr("height", function (d) { return y(d[0]) - y(d[1]); })
+    .attr("width", x.bandwidth())
+    .attr("transform", "translate(50,0)");
+
+// Add axes
+var xAxis = d3.axisBottom(x)
+        .tickFormat(function(d) {
+            return "#"+pokemonData.find(function(pokemon) { return pokemon.name === d; }).index;
+        });
+// 平移整个图表
+svg_stackbar.attr("transform", "translate(100, 0)");
+
+// 添加 x 轴
+svg_stackbar.append("g")
+    .attr("transform", "translate(" +50 + "," + height / 2 + ")")  // 平移 x 轴
+    .call(xAxis);
+
+
+svg_stackbar.append("g")
+    .call(d3.axisLeft(y))
+    .attr("transform", "translate(50,0)");
+// 创建图例
+var legend = svg_stackbar.append("g")
+.attr("transform", "translate(" + (width - 100) + "," + 20 + ")");  // 调整图例位置
+// 在创建图例时保存每个属性的可见性状态
+var legendVisibility = {
+  "hp": true,
+  "attack": true,
+  "defense": true,
+  "sp_attack": true,
+  "sp_defense": true,
+  "speed": true
+};
+// 为每个属性创建图例条目
+colorScale.domain().forEach(function (key, i) {
+var legendItem = legend.append("g")
+    .attr("transform", "translate(0," + (i * 20) + ")")
+    .on("click", function () {
+      // 切换可见性状态
+      legendVisibility[key] = !legendVisibility[key];
+
+      // 根据可见性状态更新图表和图例
+      draw_stackbar(pokemonData);
+  });
+legendItem.append("rect")
+    .attr("width", 18)
+    .attr("height", 18)
+    .attr("fill", colorScale(key));
+
+legendItem.append("text")
+    .attr("x", 25)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(key);
+});
+}
+
