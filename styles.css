@@ -1,21 +1,50 @@
 /* styles.css */
 
+html {
+    scroll-behavior: smooth;
+}
+
+body.lock-scroll {
+    overflow: hidden;
+}
+
+/* html, body {margin: 0; height: 100%; overflow: hidden}  */
+
+/* Set initial display property for the divs */
+#radar,
+#scatter,
+#stackbar {
+    display: none;
+}
+
+/* body {
+    margin: 0; 
+    background-size: cover;
+    background-position: center;
+    background-image: url('bg.png'); 
+} */
+
 body {
-    margin: 0; /* Remove default margin */
-    background-size: cover;
-    background-position: center;
-    background-image: url('bg.png'); /* Replace with the actual path to your image */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(rgba(255, 248, 230, 0.5), rgba(255, 248, 230, 0.5)), url("bg.png");
+    font-family: 'Raleway', Helvetica, Arial, sans-serif;
 }
 
 
-#circular_packing {
-    background-image: url('bg.png'); /* Replace with the actual path to your image */
+#circular_packing button {
+    /* background-image: url('bg.png'); */
+    font-weight: 400;
+    font-size: 16px; /* Adjust the font size to make the text larger */
+    font-family: 'Pokemon Solid', sans-serif;
+    border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
+    padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
+    border: none; /* Specify a border style along with the color */
+    background-color: blue;
+    color: white;
 }
 
-#radar {
-    background-size: cover;
-    background-position: center;
-    height: 1000px; /* Set an appropriate height */
-    transition: transform 0.5s ease-in-out; /* Add smooth transition */
-    background-image: url('https://c4.wallpaperflare.com/wallpaper/121/449/307/pokemon-cartoon-minimalist-pokeball-wallpaper-thumb.jpg'); /* Replace with the actual path to your image */
-}
+

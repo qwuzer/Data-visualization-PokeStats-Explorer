@@ -1,11 +1,20 @@
-// function smoothScroll(target) {
-//   var section = document.querySelector(target);
-//   var sectionRect = section.getBoundingClientRect();
-//   var offsetTop = sectionRect.top + window.scrollY;
+function scrollToView(targetId) {
+  // Get the target div to scroll to
+  var targetDiv = document.getElementById(targetId);
 
-//   // Set the transform property to scroll smoothly
-//   document.getElementById('circular_packing').style.transform = 'translateY(-' + offsetTop + 'px)';
-// }
+  // Set display property for the target div to 'block'
+  if (targetDiv) {
+      targetDiv.style.display = 'block';
+
+      // Scroll to the target div
+      targetDiv.scrollIntoView({
+          behavior: 'smooth'
+      });
+
+      // Add lock-scroll class to body after reaching the target div
+      document.body.classList.add('lock-scroll');
+  }
+}
 
 // set the dimensions and margins of the graph
 var width = 1000;
@@ -15,7 +24,10 @@ var height = 1000;
 var svg = d3.select("#circular_packing")
   .append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height)
+    .style("position", "absolute")  // Set position to absolute
+    .style("top", "50px")           // Set the top position
+    .style("left", "500px");         // Set the left position
 
 var Tooltip = d3.select("body")
   .append("div")
@@ -33,7 +45,7 @@ d3.csv("data.csv").then(function (data) {
   var generations = [1, 2, 3, 4, 5, 6, 7];
   var generationSelection = svg.append("g")
     .attr("id", "generation-selection")
-    .attr("transform", "translate(100, 400)");
+    .attr("transform", "translate(50, 200)");
 
   var boxWidth = 40;
   var boxHeight = 40;
@@ -44,8 +56,8 @@ d3.csv("data.csv").then(function (data) {
     .append("rect")
     .attr("class", "generation-box")
     .attr("id", function (d, i) { return i + 1;})// Set the id of each box to the generation number
-    .attr("x", 0) 
-    .attr("y", function (d, i) { return i * boxHeight; }) 
+    .attr("x", function (d, i) { return i * boxHeight; }) 
+    .attr("y", 0) 
     .attr("width", boxWidth) 
     .attr("height", boxHeight) 
     .style("fill", "lightgray") 
