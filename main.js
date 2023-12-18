@@ -1,18 +1,26 @@
+// 禁用滚动
+function disableScroll() {
+  document.body.style.overflow = 'hidden';
+}
+
+// 页面加载时禁用滚动
+document.addEventListener('DOMContentLoaded', function () {
+  disableScroll();
+});
+
+// 点击按钮后启用滚动
 function scrollToView(targetId) {
-  // Get the target div to scroll to
   var targetDiv = document.getElementById(targetId);
 
-  // Set display property for the target div to 'block'
   if (targetDiv) {
       targetDiv.style.display = 'block';
 
-      // Scroll to the target div
       targetDiv.scrollIntoView({
           behavior: 'smooth'
       });
 
-      // Add lock-scroll class to body after reaching the target div
       document.body.classList.add('lock-scroll');
+
   }
 }
 
@@ -25,9 +33,9 @@ var svg = d3.select("#circular_packing")
   .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .style("position", "absolute")  // Set position to absolute
-    .style("top", "50px")           // Set the top position
-    .style("left", "500px");         // Set the left position
+    .style("position", "relative")  // 使用相对定位
+    .style("top", "50px")           // 保留这一行，如果需要调整垂直位置
+    .style("left", "500px");       // Set the left position
 
 var Tooltip = d3.select("body")
   .append("div")
@@ -452,52 +460,88 @@ function draw_radar(name)
   // Convert the data point to coordinates
   
 }
+// 更新图片的函数
+function updateImages(name) 
+{
+  //name = name.split('-').join('');
+  var lowercaseName = name.toLowerCase();
+  console.log(name);
+  console.log(typeof name);
+  
+  var imageContainer = document.getElementById("imageContainer")
+  var imagePath = "images/";
+  imageContainer.style.position = "absolute";
+  imageContainer.style.left = "400px";  // 設定水平座標
+  imageContainer.style.top = "3000px";    // 設定垂直座標
 
+  // 清空之前的图片
+  imageContainer.innerHTML = "";
+  var img = document.createElement("img");
+  img.src = imagePath + lowercaseName+".png";
+  img.alt = "Image";
+  img.width = 200;
+  imageContainer.appendChild(img);
+}
+//
+var evolutionInfo;
+var evolutionIndex;
+function evolution(evolutionInfo,evolutionIndex) 
+{
+  console.log(evolutionInfo);
+  console.log(evolutionIndex);
+  //var evolutionButton = d3.select("#evolution");
+  if (evolutionInfo == 0.0) {
+    //evolutionButton.style("display", "block");
+    d3.csv("All_Pokemon.csv").then(function (data) {
+      // 在数据中查找Number为evolutionIndex的Pokemon
+      var selectedData = data.find(function (d) {
+        return +d.Number === evolutionIndex; // 使用+将字符串转换为数字
+      });
+      evolutionInfo=selectedData.FinalEvolution;
+      console.log(selectedData.Name);
+      d3.select("#dropdown").property("value", selectedData.Number);
+      // 在这里执行其他操作，例如更新可视化或其他处理
+      // 这里只是一个简单的例子，你可以根据实际需求进行操作
+      draw_radar(selectedData.Name);
+      updateImages(selectedData.Name);
+      
+    });
+  }
+  else
+  {
+    //evolutionButton.style("display", "none");
+  }
+}
 d3.csv("All_Pokemon.csv").then(function(data) {
   // 選擇下拉式選單
       var selectMenu = d3.select("#dropdown")
       .on("change", function() {
       // 獲取選擇的值
       var selectedValue = d3.select(this).property("value");
-
       // 獲取當前選擇的 option 元素
       var selectedOption = d3.select(this).select("option:checked");
-
+      
+      //進化
+      var selectedData = data[selectedValue - 1];
+      evolutionInfo = selectedData['FinalEvolution'];
+      evolutionIndex = parseInt(selectedValue) + 1;
+      console.log(evolutionIndex)
       // 獲取當前選擇的 option 的文字內容
       var selectedText = selectedOption.text();
       var selectedName = selectedText.split(' ')[1];
+      
+      console.log(selectedName);
       // 在這裡執行相應的操作，例如更新視覺化或其他處理
       // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
       console.log("Selected Value: " + selectedValue);
       console.log("Selected Text: " + selectedText);
       draw_radar(selectedName);
-          updateImages(selectedName);
+      updateImages(selectedName);
       });
       selectMenu.style("position", "absolute")
             .style("left", "0px")
-            .style("top", "1020px");
+            .style("top", "3100px");
 
-    // 更新图片的函数
-  function updateImages(name) 
-  {
-    var lowercaseName = name.toLowerCase();
-    console.log(name);
-    console.log(typeof name);
-    
-    var imageContainer = document.getElementById("imageContainer")
-    var imagePath = "images/";
-    imageContainer.style.position = "absolute";
-    imageContainer.style.left = "400px";  // 設定水平座標
-    imageContainer.style.top = "1000px";    // 設定垂直座標
-
-    // 清空之前的图片
-    imageContainer.innerHTML = "";
-    var img = document.createElement("img");
-    img.src = imagePath + lowercaseName+".png";
-    img.alt = "Image";
-    img.width = 200;
-    imageContainer.appendChild(img);
-  }
     // 使用 Map 來存儲每個 Number 的第一筆資料
   var firstDataMap = new Map();
   // 過濾數據，只保留每個 Number 的第一筆資料
@@ -674,12 +718,14 @@ var svg_stackbar = d3.select("#stackbar")
   
       console.log(pokemonData);
       // Now pokemonData is in the desired format
-      draw_stackbar(pokemonData);
+      draw_stackbar(pokemonData,pokemonData);
   });
+  var clickedKey="null";
 // Set up chart dimensions
-function draw_stackbar(pokemonData)
+function draw_stackbar(pokemonData,pokemonData_reserve)
 {
-
+  svg_stackbar.selectAll("*").remove();
+  let rects = svg_stackbar.selectAll('bar_rect')
 // Set up scales and axes
 var x = d3.scaleBand()
     .domain(pokemonData.map(function (d) { return d.name; }))
@@ -704,24 +750,27 @@ var stackedData = stack(pokemonData);
 // 创建颜色比例尺，将每个属性映射到一个颜色
 var colorScale = d3.scaleOrdinal()
     .domain(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
-    .range(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
+    .range(['#8CC084', '#D9C277', '#BD9C46', '#7EA2A8', '#2E4D9B', '#7E587E']);
 
 var color = function(d) { return colorScale(d.key); };
-
-
 // Draw the bars
 var barchart = svg_stackbar.selectAll("g")
     .data(stackedData)
     .enter().append("g")
     .attr("fill",color)
-    .selectAll("rect")
+    .selectAll("bar_rect")
     .data(function (d) { return d; })
     .enter().append("rect")
+    .attr("class","bar_rect")
     .attr("x", function (d) { return x(d.data.name); })
-    .attr("y", function (d) { return y(d[1]); })
-    .attr("height", function (d) { return y(d[0]) - y(d[1]); })
     .attr("width", x.bandwidth())
-    .attr("transform", "translate(50,0)");
+    .attr("transform", "translate(50,100)")
+    .attr("height",0)
+    .attr("y", function (d) { return y(d[0]); }) // 修改这里
+    .transition() // 添加过渡效果
+    .duration(1000) // 过渡时间，单位毫秒
+    .attr("height", function (d) { return y(d[0]) - y(d[1]); })
+    .attr("y", function (d) { return y(d[1]); });
 
 // Add axes
 var xAxis = d3.axisBottom(x)
@@ -729,40 +778,43 @@ var xAxis = d3.axisBottom(x)
             return "#"+pokemonData.find(function(pokemon) { return pokemon.name === d; }).index;
         });
 // 平移整个图表
-svg_stackbar.attr("transform", "translate(100, 0)");
+svg_stackbar.attr("transform", "translate(100, 300)");
 
 // 添加 x 轴
 svg_stackbar.append("g")
-    .attr("transform", "translate(" +50 + "," + height / 2 + ")")  // 平移 x 轴
+    .attr("transform", "translate(" +50 + "," + (height / 2 + 100) + ")")  // 平移 x 轴
     .call(xAxis);
 
 
 svg_stackbar.append("g")
     .call(d3.axisLeft(y))
-    .attr("transform", "translate(50,0)");
+    .attr("transform", "translate(50,100)");
 // 创建图例
 var legend = svg_stackbar.append("g")
 .attr("transform", "translate(" + (width - 100) + "," + 20 + ")");  // 调整图例位置
 // 在创建图例时保存每个属性的可见性状态
-var legendVisibility = {
-  "hp": true,
-  "attack": true,
-  "defense": true,
-  "sp_attack": true,
-  "sp_defense": true,
-  "speed": true
-};
 // 为每个属性创建图例条目
 colorScale.domain().forEach(function (key, i) {
-var legendItem = legend.append("g")
-    .attr("transform", "translate(0," + (i * 20) + ")")
-    .on("click", function () {
-      // 切换可见性状态
-      legendVisibility[key] = !legendVisibility[key];
-
-      // 根据可见性状态更新图表和图例
-      draw_stackbar(pokemonData);
+  
+  var legendItem = legend.append("g")
+  .attr("transform", "translate(0," + (i * 20) + ")")
+  .on("click", function (event, d, i) {
+      console.log("点击的属性是：" + clickedKey);
+      if(clickedKey==key)
+      {
+        clickedKey="null";
+      }
+      else
+      {
+        clickedKey = key; // 获取被点击的属性名称
+      } 
+      console.log("点击的属性是：" + clickedKey);
+      // 将 PokemonData 中除了被点击的属性之外的其他属性的值设为0
+      draw_new_barchart(pokemonData,pokemonData_reserve)
+      
   });
+
+
 legendItem.append("rect")
     .attr("width", 18)
     .attr("height", 18)
@@ -776,4 +828,37 @@ legendItem.append("text")
     .text(key);
 });
 }
+
+function draw_new_barchart(pokemonData,pokemonData_reserve)
+{     
+    var filterData = pokemonData_reserve.map(function (pokemon) {
+    var filteredPokemon = {
+        name: pokemon.name,
+        index: pokemon.index,
+    };
+
+    // 设置被点击的属性值
+    filteredPokemon[clickedKey] = pokemon[clickedKey];
+
+    // 将其他五个属性的值设置为0
+    ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"].forEach(function (key) {
+        if (key !== clickedKey) {
+            filteredPokemon[key] = 0;
+        }
+    });
+
+    return filteredPokemon;
+    });
+    if(clickedKey=="null")
+    {
+      console.log("1");
+      draw_stackbar(pokemonData_reserve,pokemonData_reserve);
+    }
+    else
+    {
+      console.log("2");
+      draw_stackbar(filterData,pokemonData_reserve);
+    }
+      
+} 
 

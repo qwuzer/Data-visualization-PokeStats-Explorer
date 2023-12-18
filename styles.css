@@ -32,11 +32,60 @@ body {
     align-items: center;
     background: linear-gradient(rgba(255, 248, 230, 0.5), rgba(255, 248, 230, 0.5)), url("bg.png");
     font-family: 'Raleway', Helvetica, Arial, sans-serif;
+    background-size: cover;
+    min-width: 100vw; /* 设置最小宽度为视口宽度 */
+    min-height: 100vh; /* 设置最小高度为视口高度 */
 }
 
 
 #circular_packing button {
     /* background-image: url('bg.png'); */
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    z-index: 1;
+    font-weight: 400;
+    font-size: 16px; /* Adjust the font size to make the text larger */
+    font-family: 'Pokemon Solid', sans-serif;
+    border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
+    padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
+    border: none; /* Specify a border style along with the color */
+    background-color: blue;
+    color: white;
+}
+#scatter button {
+    /* background-image: url('bg.png'); */
+    position: absolute;
+    top: 1000px;
+    left: 50px;
+    font-weight: 400;
+    font-size: 16px; /* Adjust the font size to make the text larger */
+    font-family: 'Pokemon Solid', sans-serif;
+    border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
+    padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
+    border: none; /* Specify a border style along with the color */
+    background-color: blue;
+    color: white;
+}
+#stackbar button {
+    /* background-image: url('bg.png'); */
+    position: absolute;
+    top: 2000px;
+    left: 50px;
+    font-weight: 400;
+    font-size: 16px; /* Adjust the font size to make the text larger */
+    font-family: 'Pokemon Solid', sans-serif;
+    border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
+    padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
+    border: none; /* Specify a border style along with the color */
+    background-color: blue;
+    color: white;
+}
+#radar #evolution{
+    /* background-image: url('bg.png'); */
+    position: absolute;
+    top: 3200px;
+    left: 50px;
     font-weight: 400;
     font-size: 16px; /* Adjust the font size to make the text larger */
     font-family: 'Pokemon Solid', sans-serif;
