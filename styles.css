@@ -1,0 +1,50 @@
+/* styles.css */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body.lock-scroll {
+    overflow: hidden;
+}
+
+/* html, body {margin: 0; height: 100%; overflow: hidden}  */
+
+/* Set initial display property for the divs */
+#radar,
+#scatter,
+#stackbar {
+    display: none;
+}
+
+/* body {
+    margin: 0; 
+    background-size: cover;
+    background-position: center;
+    background-image: url('bg.png'); 
+} */
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(rgba(255, 248, 230, 0.5), rgba(255, 248, 230, 0.5)), url("bg.png");
+    font-family: 'Raleway', Helvetica, Arial, sans-serif;
+}
+
+
+#circular_packing button {
+    /* background-image: url('bg.png'); */
+    font-weight: 400;
+    font-size: 16px; /* Adjust the font size to make the text larger */
+    font-family: 'Pokemon Solid', sans-serif;
+    border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
+    padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
+    border: none; /* Specify a border style along with the color */
+    background-color: blue;
+    color: white;
+}
+
+
