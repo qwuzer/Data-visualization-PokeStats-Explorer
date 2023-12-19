@@ -1,6 +1,6 @@
-function disableScroll() {
-  document.body.style.overflow = 'hidden';
-}
+// function disableScroll() {
+//   document.body.style.overflow = 'hidden';
+// }
 
 document.addEventListener('DOMContentLoaded', function () {
   disableScroll();
@@ -43,11 +43,14 @@ var Tooltip = d3.select("body")
   .style("opacity", 0)
   .attr("class", "tooltip")
   .style("position", "absolute")
+  .style("z-index", "10")
   .style("background-color", "white")
   .style("border", "solid")
   .style("border-width", "2px")
   .style("border-radius", "5px")
-  .style("padding", "5px");
+  .style("padding", "5px")
+  .style("pointer-events", "none");
+
 
 d3.csv("data.csv").then(function (data) {
   var generations = [1, 2, 3, 4, 5, 6, 7];
@@ -84,9 +87,12 @@ d3.csv("data.csv").then(function (data) {
               return nodeData.generation === +genNumber ? 1 : 0.3;
           });
           
-      
           generationBoxes.classed("selected", false);
           genBox.classed("selected", true);
+
+          filterScatter(genNumber);
+          console.log(genNumber);
+
       } else {
           // Reset settings
           node.style("fill-opacity", 0.8);
@@ -236,10 +242,10 @@ d3.csv("data.csv").then(function (data) {
     var tooltipOffsetX = 20;
     var tooltipOffsetY = 10;
 
-    Tooltip
-      .html('<u>' + d.type + ' Gen ' + d.generation + '</u>' + "<br>" + d.number + " Pokemon")
-      .style("left", (event.pageX + tooltipOffsetX) + "px")
-      .style("top", (event.pageY - tooltipOffsetY) + "px");
+  Tooltip
+    .html('<u>' + d.type + ' Gen ' + d.generation + '</u>' + "<br>" + d.number + " Pokemon")
+    .style("left", (event.pageX + tooltipOffsetX) + "px")
+    .style("top", (event.pageY - tooltipOffsetY) + "px");
   }
 
   function mouseleave(event, d) {
@@ -254,53 +260,83 @@ d3.csv("data.csv").then(function (data) {
 /* --------------------------------------------------------------------------------------------------------*/
 
 var margin = { top: 10, right: 10, bottom: 30, left: 30 };
-    scatterWidth = 1000 - margin.left - margin.right;
+    scatterWidth = 1200 - margin.left - margin.right;
     scatterHeight = 1000 - margin.top - margin.bottom;
 
 var scattersvg = d3.select("#scatter")
   .append("svg")
-  .attr("width", scatterWidth)
-  .attr("height", scatterHeight)
-  .append("g")
+  .attr("width", scatterWidth + margin.left + margin.right)
+  .attr("height", scatterHeight + margin.top + margin.bottom)
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("All_Pokemon.csv").then(function (data) {
-  // Create a type-to-color mapping
+var scatterG =  scattersvg.append("g")
+  .attr("width", scatterWidth - 200 )
+  .attr("height", scatterHeight);
+
+
+function filterScatter( generation ) {
+
+  d3.csv("All_Pokemon.csv").then(function (data) {
+    var scatterData = data
+        .filter(function(d) {
+            return +d.Generation === +generation;
+        })
+        .map(function(d) {
+            return {
+                weight: +d.Weight,
+                height: +d.Height,
+                type1: d.Type1,
+                name: d.Name,
+                number: d.Number,
+                bmi: d.BMI
+            };
+        });
+      
+        console.log(scatterData);
+    draw_scatter(scatterData);
+
+  });
+}
+
+function draw_scatter(data) {
+  scatterG.selectAll("*").remove();
+
   var typeColorMap = {};
   var color = d3.scaleOrdinal(d3.schemeCategory10);
 
   data.forEach(function (d) {
-    d.weight = +d.Weight;
-    d.height = +d.Height;
-    typeColorMap[d["Type1"]] = color(d["Type1"]);
+    typeColorMap[d["type1"]] = color(d["type1"]);
   });
+
 
   // Scale and axis setup
   var x = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.weight)])
-    .range([0, scatterWidth - 50 ]);
+    // .domain([0, 1000])
+    .range([0, scatterWidth - 200 ]);
 
-  var xaxis = scattersvg.append("g")
-    .attr("transform", "translate(0," + (scatterHeight - 50) + ")")
+  var xaxis = scatterG.append("g")
+    .attr("transform", "translate(20," + (scatterHeight - 50) + ")")
     .call(d3.axisBottom(x));
 
   var y = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.height)])
     .range([scatterHeight - 50 , 0]);
 
-  var yaxis = scattersvg.append("g")
+  var yaxis = scatterG.append("g")
+    .attr("transform", "translate(20,0)")
     .call(d3.axisLeft(y));
 
   // Add legend
   var legend = scattersvg.selectAll(".legend")
-  .data(Object.keys(typeColorMap))
-  .enter().append("g")
-  .attr("class", "legend")
-  .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+    .data(Object.keys(typeColorMap))
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
 
   // Draw legend color blocks
   legend.append("rect")
-    .attr("x", scatterWidth - margin.right - 38)
+    .attr("x", scatterWidth + margin.right - 38)
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", d => typeColorMap[d]);
@@ -313,66 +349,191 @@ d3.csv("All_Pokemon.csv").then(function (data) {
     .style("text-anchor", "end")
     .text(d => d);
 
-  // // Add a clipPath: everything out of this area won't be drawn.
-  // var clip = scattersvg.append("defs").append("svg:clipPath")
-  //   .attr("id", "clip")
-  //   .append("svg:rect")
-  //   .attr("width", scatterWidth )
-  //   .attr("height", scatterHeight  )
-  //   .attr("x", 0)
-  //   .attr("y", 0);
-  
-  // scattersvg.attr("clip-path", "url(#clip)");
-
-   // Draw points
-   var dots = scattersvg.selectAll(".dot")
-   .data(data)
-   .enter().append("circle")
-   .attr("class", "dot")
-   .attr("r", 3.5)
-   .attr("cx", d => x(d.weight))
-   .attr("cy", d => y(d.height))
-   .attr("name", d => d.Number)
-   .style("fill", d => typeColorMap[d["Type1"]]);
-
-  // Add brushing and zooming
+  // Add brushing and zooming(Added before tooltip to prevent tooltip from being covered)
   var brush = d3.brush()
-    .extent([[0, 0], [scatterWidth , scatterHeight - 51]])
+    .extent([[20,0], [scatterWidth - 200 + 20 , scatterHeight - 50]])
     .on("end", updateChart);
 
-
-  scattersvg.append("g")
+  scatterG.append("g")
     .attr("class", "brush")
     .call(brush);
 
+  // Draw points
+  var dots = scatterG.selectAll(".dot")
+    .data(data)
+    .enter().append("circle")
+    .attr("class", "dot")
+    .attr("r", 5)
+    .attr("cx", d => x(d.weight) + 20 )
+    .attr("cy", d => y(d.height) )
+    .attr("name", d => d.Number)
+    .style("fill", d => typeColorMap[d["type1"]])
+    .on("mouseover", mouseover)
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave);
+
   var idleTimeout;
-  function idled() { idleTimeout = null; }
+  function idled() {
+     idleTimeout = null;
+  }
 
   function updateChart( event ) {
     var extent = event.selection;
 
-    //console.log(extent)
     // If no selection, back to the initial coordinate. Otherwise, update X axis domain
     if (!extent) {
       if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
-      x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
-      y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
-      //console.log('hi')
+        x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
+        y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
+            // Update axis and circle position
+        xaxis.transition().duration(1000).call(d3.axisBottom(x));
+        yaxis.transition().duration(1000).call(d3.axisLeft(y));
+        scatterG.selectAll(".dot")
+          .transition().duration(1000)
+          .attr("cx", function (d) { return x(d.weight)  + 20; })
+          .attr("cy", function (d) { return y(d.height) ; });
     } else {
-      x.domain([x.invert(extent[0][0]), x.invert(extent[1][1])]);
-      y.domain([y.invert(extent[1][1]), y.invert(extent[0][0])]);
-      scattersvg.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
+      x.domain([x.invert(extent[0][0]), x.invert(extent[1][0])]);
+      y.domain([y.invert(extent[1][1]), y.invert(extent[0][1])]);
+      scatterG.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
+      // Update axis and circle position
+      xaxis.transition().duration(1000).call(d3.axisBottom(x));
+      yaxis.transition().duration(1000).call(d3.axisLeft(y));
+      scatterG.selectAll(".dot")
+        .transition().duration(1000)
+        .attr("cx", function (d) { return x(d.weight) +  200; })
+        .attr("cy", function (d) { return y(d.height) ; });
     }
-  
-    // Update axis and circle position
-    xaxis.transition().duration(1000).call(d3.axisBottom(x));
-    yaxis.transition().duration(1000).call(d3.axisLeft(y));
-    scattersvg.selectAll(".dot")
-      .transition().duration(1000)
-      .attr("cx", function (d) { return x(d.weight); })
-      .attr("cy", function (d) { return y(d.height); });
   }
-});
+
+  function mouseover(event, d) {
+    Tooltip
+      .style("opacity", 1);
+  }
+
+  function mousemove(event, d) {
+    var tooltipOffsetX = 20;
+    var tooltipOffsetY = 10;
+    Tooltip
+      .html(d.name + '<br>' +  " Weight: " + d.weight + "kg" +  ' Height: ' + d.height + "m" + '<br>' + " BMI: " + d.bmi)
+      .style("left", (event.pageX + tooltipOffsetX) + "px")
+      .style("top", (event.pageY - tooltipOffsetY) + "px");
+  }
+
+  function mouseleave(event, d) {
+    Tooltip
+      .style("opacity", 0);
+  }
+}
+
+
+// function draw_scatter(scatterData) {
+
+//   d3.csv("All_Pokemon.csv").then(function (data) {
+//     // Create a type-to-color mapping
+//     var typeColorMap = {};
+//     var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+//     data.forEach(function (d) {
+//       d.weight = +d.Weight;
+//       d.height = +d.Height;
+//       typeColorMap[d["Type1"]] = color(d["Type1"]);
+//     });
+
+//     // Scale and axis setup
+//     var x = d3.scaleLinear()
+//       // .domain([0, d3.max(data, d => d.weight)])
+//       .domain([0, 1000])
+//       .range([0, scatterWidth - 200 ]);
+
+//     var xaxis = scatterG.append("g")
+//       .attr("transform", "translate(20," + (scatterHeight - 50) + ")")
+//       .call(d3.axisBottom(x));
+
+//     var y = d3.scaleLinear()
+//       .domain([0, d3.max(data, d => d.height)])
+//       .range([scatterHeight - 50 , 0]);
+
+//     var yaxis = scatterG.append("g")
+//       .attr("transform", "translate(20,0)")
+//       .call(d3.axisLeft(y));
+
+//     // Add legend
+//     var legend = scattersvg.selectAll(".legend")
+//       .data(Object.keys(typeColorMap))
+//       .enter().append("g")
+//       .attr("class", "legend")
+//       .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+//     // Draw legend color blocks
+//     legend.append("rect")
+//       .attr("x", scatterWidth + margin.right - 38)
+//       .attr("width", 18)
+//       .attr("height", 18)
+//       .style("fill", d => typeColorMap[d]);
+
+//     // Add legend text
+//     legend.append("text")
+//       .attr("x", scatterWidth - margin.right - 44)
+//       .attr("y", 9)
+//       .attr("dy", ".35em")
+//       .style("text-anchor", "end")
+//       .text(d => d);
+
+//     // Draw points
+//     var dots = scatterG.selectAll(".dot")
+//       .data(data)
+//       .enter().append("circle")
+//       .attr("class", "dot")
+//       .attr("r", 3.5)
+//       .attr("cx", d => x(d.weight) + 20 )
+//       .attr("cy", d => y(d.height) )
+//       .attr("name", d => d.Number)
+//       .style("fill", d => typeColorMap[d["Type1"]]);
+
+//     // Add brushing and zooming
+//     var brush = d3.brush()
+//       .extent([[20,0], [scatterWidth - 200 + 20 , scatterHeight - 50]])
+//       .on("end", updateChart);
+
+//     scatterG.append("g")
+//       .attr("class", "brush")
+//       .call(brush);
+
+//     var idleTimeout;
+//     function idled() { idleTimeout = null; }
+
+//     function updateChart( event ) {
+//       var extent = event.selection;
+
+//       // If no selection, back to the initial coordinate. Otherwise, update X axis domain
+//       if (!extent) {
+//         if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
+//           x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
+//           y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
+//               // Update axis and circle position
+//           xaxis.transition().duration(1000).call(d3.axisBottom(x));
+//           yaxis.transition().duration(1000).call(d3.axisLeft(y));
+//           scatterG.selectAll(".dot")
+//             .transition().duration(1000)
+//             .attr("cx", function (d) { return x(d.weight) + 20 ; })
+//             .attr("cy", function (d) { return y(d.height) ; });
+//       } else {
+//         x.domain([x.invert(extent[0][0]), x.invert(extent[1][0])]);
+//         y.domain([y.invert(extent[1][1]), y.invert(extent[0][1])]);
+//         scatterG.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
+//         // Update axis and circle position
+//         xaxis.transition().duration(1000).call(d3.axisBottom(x));
+//         yaxis.transition().duration(1000).call(d3.axisLeft(y));
+//         scatterG.selectAll(".dot")
+//           .transition().duration(1000)
+//           .attr("cx", function (d) { return x(d.weight) + 120; })
+//           .attr("cy", function (d) { return y(d.height) ; });
+//       }
+//     }
+//   });
+// }
+
 
 
 

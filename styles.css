@@ -11,11 +11,11 @@ body.lock-scroll {
 /* html, body {margin: 0; height: 100%; overflow: hidden}  */
 
 /* Set initial display property for the divs */
-#radar,
+/* #radar,
 #scatter,
 #stackbar {
     display: none;
-}
+} */
 
 /* body {
     margin: 0; 
@@ -95,5 +95,4 @@ body {
     background-color: blue;
     color: white;
 }
-
 
