@@ -1,14 +1,11 @@
-// 禁用滚动
 function disableScroll() {
   document.body.style.overflow = 'hidden';
 }
 
-// 页面加载时禁用滚动
 document.addEventListener('DOMContentLoaded', function () {
   disableScroll();
 });
 
-// 点击按钮后启用滚动
 function scrollToView(targetId) {
   var targetDiv = document.getElementById(targetId);
 
@@ -24,6 +21,9 @@ function scrollToView(targetId) {
   }
 }
 
+/* --------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------Circular packing--------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
 
 // set the dimensions and margins of the graph
 var width = 1000;
@@ -32,11 +32,11 @@ var height = 1000;
 // append the svg object to the body of the page
 var svg = d3.select("#circular_packing")
   .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .style("position", "relative")  // 使用相对定位
-    .style("top", "50px")           // 保留这一行，如果需要调整垂直位置
-    .style("left", "500px");       // Set the left position
+  .attr("width", width)
+  .attr("height", height)
+  .style("position", "relative")  
+  .style("top", "50px")           
+  .style("left", "500px");       
 
 var Tooltip = d3.select("body")
   .append("div")
@@ -49,7 +49,6 @@ var Tooltip = d3.select("body")
   .style("border-radius", "5px")
   .style("padding", "5px");
 
-  
 d3.csv("data.csv").then(function (data) {
   var generations = [1, 2, 3, 4, 5, 6, 7];
   var generationSelection = svg.append("g")
@@ -250,334 +249,9 @@ d3.csv("data.csv").then(function (data) {
 
 });
 
-
-
-// append the svg object to the body of the page
-var radarsvg = d3.select("#radar")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-
-function draw_radar(name)
-{
-  d3.csv("data.csv").then(function (data) {
-      //console.log(data);
-
-      let radatData = [];
-      data.forEach(function(d) {
-          radatData.push({
-              name: d.name,
-              hp: +d.hp,
-              attack: +d.attack,
-              defense: +d.defense,
-              sp_attack: +d.sp_attack,
-              sp_defense: +d.sp_defense,
-              speed: +d.speed,
-              total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
-          });
-      });
-      //console.log("radarData"+radatData);
-
-      let radialScale = d3.scaleLinear()
-          .domain([0,100])
-          .range([0,150]);//size of the circle
-
-      let ticks = [30,60,90,120,150];
-
-      var radarG = radarsvg.append("g")
-                .selectAll("circle")
-                .data(ticks)
-                .enter()
-                .append("circle")
-                .attr("cx", width / 2)
-                .attr("cy", height / 2)
-                .attr("fill", "none")
-                .attr("stroke", "gray")
-                .attr("r", function(d){ return radialScale(d); });
-
-      radarsvg.selectAll(".ticklabel")
-          .data(ticks)
-          .enter()
-          .append("text")
-          .attr("class", "ticklabel")
-          .attr("x", width / 2 + 5)
-          .attr("y", function(d) {
-              return height / 2 - radialScale(d) - 5; // Adjust the position for proper alignment
-          })
-          .style("font-size", "15px") // S
-          .text(function(d) {
-              return d.toString();
-          });
-
-      function angleToCoordinate(angle, value){
-        let x = Math.cos(angle) * radialScale(value);
-        let y = Math.sin(angle) * radialScale(value);
-        return {"x": width / 2 + x, "y": height / 2 - y};
-      }
-
-      let attributeOrder = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"];
-
-      // Modify the featureData mapping to use the attributeOrder
-      let featureData = attributeOrder.map((attribute, i) => {
-          let angle = (Math.PI / 2) + (2 * Math.PI * i / attributeOrder.length);
-          return {
-              "name": attribute,
-              "angle": angle,
-              "line_coord": angleToCoordinate(angle, 150),
-              "label_coord": angleToCoordinate(angle, 170)
-          };
-      });
-
-      //console.log(featureData);
-
-    // Rest of your code remains the same
-    // draw axis line
-    radarsvg.selectAll("line")
-        .data(featureData)
-        .enter().append("line")
-        .attr("x1", width / 2)
-        .attr("y1", height / 2)
-        .attr("x2", d => d.line_coord.x)
-        .attr("y2", d => d.line_coord.y)
-        .attr("stroke","black");
-
-    // draw axis label
-    radarsvg.selectAll(".axislabel")
-        .data(featureData)
-        .enter()
-        .append("text")
-        .attr("x", d => d.label_coord.x)
-        .attr("y", d => d.label_coord.y)
-        .text(d => d.name);
-    // Define the maximum value for your data (you can adjust this based on your data)
-  let maxValue = 150;
-
-  // Create a scale for mapping data values to the radial positions
-  let dataScale = d3.scaleLinear()
-      .domain([0, maxValue])
-      .range([0, radialScale(maxValue)]);
-
-  // Create a function to convert data values to coordinates on the radar chart
-  function dataToCoordinates(data) {
-      return featureData.map((attribute) => {
-          let angle = attribute.angle;
-          // let radius = dataScale(data[attribute.name]);
-          let radius = data[attribute.name]
-          return angleToCoordinate(angle, radius);
-      });
-  }
-
-  d3.csv("All_Pokemon.csv").then(function (data) {
-    radarsvg.selectAll("polygon").remove();
-    let radatData = [];
-    let MyType;
-    //console.log(name);
-    data.forEach(function(d) {
-        if(d.Name == name) {
-            MyType = d.Type1;
-            radatData.push({
-                name: d.Name,
-                hp: +d.HP,
-                attack: +d.Att,
-                defense: +d.Def,
-                sp_attack: +d.Spa,
-                sp_defense: +d.Spd,
-                speed: +d.Spe,
-                total: +d.Att + +d.HP + +d.Def + +d.Spa + +d.Spd + +d.Spe
-            });
-        }
-    });
-    let fillColor;
-    switch (MyType) {
-      case "Grass":
-          fillColor = "darkgreen";
-          break;
-      case "Fire":
-          fillColor = "red";
-          break;
-      case "Water":
-          fillColor = "darkblue";
-          break;
-      case "Normal":
-          fillColor = "gray";
-          break;
-      case "Ground":
-          fillColor = "saddlebrown";
-          break;
-      case "Bug":
-          fillColor = "limegreen";
-          break;
-      case "Rock":
-          fillColor = "burlywood";
-          break;
-      case "Electric":
-          fillColor = "yellow";
-          break;
-      case "Ice":
-          fillColor = "lightblue";
-          break;
-      case "Steel":
-          fillColor = "teal";
-          break;
-      case "Poison":
-          fillColor = "purple";
-          break;
-      case "Flying":
-          fillColor = "lightskyblue";
-          break;
-      case "Ghost":
-          fillColor = "dimgray";
-          break;
-      case "Dark":
-          fillColor = "darkpurple";
-          break;
-      case "Fairy":
-          fillColor = "lightpink";
-          break;
-      case "Psychic":
-          fillColor = "deeppink";
-          break;
-      case "Dragon":
-          fillColor = "indigo";
-          break;
-      default:
-          fillColor = "blue"; // Default color
-  }
-
-  let dataCoordinates = dataToCoordinates(radatData[0]);
-
-  radatData.forEach(function (d) {
-      //console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
-  });
-
-    // Draw the radar chart using the dataCoordinates
-    radarsvg.append("polygon")
-      .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
-      .attr("stroke", "blue") // Adjust the stroke color
-      .attr("fill", fillColor) // Adjust the fill color
-      .attr("opacity", 0.6); // Adjust the opacity
-});
-
-  });
-  // Convert the data point to coordinates
-  
-}
-// 更新图片的函数
-function updateImages(name) 
-{
-  //name = name.split('-').join('');
-  var lowercaseName = name.toLowerCase();
-  //console.log(name);
-  //console.log(typeof name);
-  
-  var imageContainer = document.getElementById("imageContainer")
-  var imagePath = "images/";
-  imageContainer.style.position = "absolute";
-  imageContainer.style.left = "400px";  // 設定水平座標
-  imageContainer.style.top = "3000px";    // 設定垂直座標
-
-  // 清空之前的图片
-  imageContainer.innerHTML = "";
-  var img = document.createElement("img");
-  img.src = imagePath + lowercaseName+".png";
-  img.alt = "Image";
-  img.width = 200;
-  imageContainer.appendChild(img);
-}
-//
-var evolutionInfo;
-var evolutionIndex;
-function evolution(evolutionInfo,evolutionIndex) 
-{
-  console.log("the if can evolve"+evolutionInfo);
-  console.log(evolutionIndex);
-  //var evolutionButton = d3.select("#evolution");
-  if (evolutionInfo == 0.0) {
-    //evolutionButton.style("display", "block");
-    d3.csv("All_Pokemon.csv").then(function (data) {
-      // 在数据中查找Number为evolutionIndex的Pokemon
-      var selectedData = data.find(function (d) {
-        return +d.Number === evolutionIndex; // 使用+将字符串转换为数字
-      });
-      evolutionInfo=selectedData.FinalEvolution;
-      evolutionIndex = parseInt(selectedData.Number) + 1;
-      console.log(evolutionIndex);
-      //console.log(selectedData.Name);
-      d3.select("#dropdown").property("value", selectedData.Number);
-      // 在这里执行其他操作，例如更新可视化或其他处理
-      // 这里只是一个简单的例子，你可以根据实际需求进行操作
-      draw_radar(selectedData.Name);
-      updateImages(selectedData.Name);
-      
-    });
-  }
-  else
-  {
-    //evolutionButton.style("display", "none");
-  }
-}
-//呼叫這個改Menu
-updateMenu("Grass",1);
-function updateMenu(type,generation)
-{
-  console.log(type+generation);
-  d3.csv("All_Pokemon.csv").then(function(data)
-  {
-    // 選擇下拉式選單
-        var filteredData = data.filter(function (d) {
-          return d.Type1 === type && +d.Generation === +generation; // 使用+将字符串转换为数字
-        });
-        console.log(filteredData);
-        var selectMenu = d3.select("#dropdown")
-        .on("change", function() {
-        // 獲取選擇的值
-        var selectedValue = d3.select(this).property("value");
-        // 獲取當前選擇的 option 元素
-        var selectedOption = d3.select(this).select("option:checked");
-        //進化
-        var selectedData = data[selectedValue - 1];
-        evolutionInfo = selectedData['FinalEvolution'];
-        evolutionIndex = parseInt(selectedValue) + 1;
-        //console.log(evolutionIndex)
-        //console.log(evolutionInfo)
-        // 獲取當前選擇的 option 的文字內容
-        var selectedText = selectedOption.text();
-        var selectedName = selectedText.split(' ')[1];
-        
-        //console.log(selectedName);
-        // 在這裡執行相應的操作，例如更新視覺化或其他處理
-        // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
-        //console.log("Selected Value: " + selectedValue);
-        //console.log("Selected Text: " + selectedText);
-        draw_radar(selectedName);
-        updateImages(selectedName);
-        });
-        selectMenu.style("position", "absolute")
-              .style("left", "0px")
-              .style("top", "3100px");
-
-      // 使用 Map 來存儲每個 Number 的第一筆資料
-        var firstDataMap = new Map();
-    // 過濾數據，只保留每個 Number 的第一筆資料
-        filteredData.forEach(function(d) {
-        if (!firstDataMap.has(d.Number)) {
-            firstDataMap.set(d.Number, d);
-        }
-    });
-    var first=1;
-    // 將過濾後的資料填充到下拉式選單中
-    selectMenu.append("option")
-            .attr("value", 0)
-            .text(function(d) { return "choose your pokemon" });
-    firstDataMap.forEach(function(value, key) {
-        selectMenu.append("option")
-            .attr("value", value.Number)
-            .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
-    });
-
-  });
-}
+/* --------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------Scatter plot------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
 
 var margin = { top: 10, right: 10, bottom: 30, left: 30 };
     scatterWidth = 1000 - margin.left - margin.right;
@@ -585,8 +259,8 @@ var margin = { top: 10, right: 10, bottom: 30, left: 30 };
 
 var scattersvg = d3.select("#scatter")
   .append("svg")
-    .attr("width", scatterWidth)
-    .attr("height", scatterHeight)
+  .attr("width", scatterWidth)
+  .attr("height", scatterHeight)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -701,36 +375,42 @@ d3.csv("All_Pokemon.csv").then(function (data) {
 });
 
 
+
+/* --------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------Stackbar plot------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
+
+
 //stackbarchart
 var svg_stackbar = d3.select("#stackbar")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
    
-    d3.csv("All_Pokemon.csv").then(function(data) {
-      // Filter and map the CSV data to the desired format
-      var pokemonData = data
-          .filter(function(d) {
-              return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
-          })
-          .map(function(d) {
-              return {
-                  index:d.Number, 
-                  name: d.Name,
-                  hp: +d.HP,
-                  attack: +d.Att,
-                  defense: +d.Def,
-                  sp_attack: +d.Spa,
-                  sp_defense: +d.Spd,
-                  speed: +d.Spe
-              };
-          });
+  d3.csv("All_Pokemon.csv").then(function(data) {
+    // Filter and map the CSV data to the desired format
+    var pokemonData = data
+        .filter(function(d) {
+            return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
+        })
+        .map(function(d) {
+            return {
+                index:d.Number, 
+                name: d.Name,
+                hp: +d.HP,
+                attack: +d.Att,
+                defense: +d.Def,
+                sp_attack: +d.Spa,
+                sp_defense: +d.Spd,
+                speed: +d.Spe
+            };
+        });
   
-      //console.log(pokemonData);
-      // Now pokemonData is in the desired format
-      draw_stackbar(pokemonData,pokemonData);
-  });
-  var clickedKey="null";
+    // Now pokemonData is in the desired format
+    draw_stackbar(pokemonData,pokemonData);
+});
+
+var clickedKey="null";
 // Set up chart dimensions
 function draw_stackbar(pokemonData,pokemonData_reserve)
 {
@@ -872,3 +552,336 @@ function draw_new_barchart(pokemonData,pokemonData_reserve)
       
 } 
 
+
+/* --------------------------------------------------------------------------------------------------------*/
+/* ----------------------------------------------Radar plot------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
+
+// append the svg object to the body of the page
+var radarsvg = d3.select("#radar")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+
+function draw_radar(name)
+{
+  d3.csv("data.csv").then(function (data) {
+      let radatData = [];
+
+      data.forEach(function(d) {
+          radatData.push({
+              name: d.name,
+              hp: +d.hp,
+              attack: +d.attack,
+              defense: +d.defense,
+              sp_attack: +d.sp_attack,
+              sp_defense: +d.sp_defense,
+              speed: +d.speed,
+              total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
+          });
+      });
+
+      let radialScale = d3.scaleLinear()
+          .domain([0,100])
+          .range([0,150]);//size of the circle
+
+      let ticks = [30,60,90,120,150];
+
+      var radarG = radarsvg.append("g")
+                .selectAll("circle")
+                .data(ticks)
+                .enter()
+                .append("circle")
+                .attr("cx", width / 2)
+                .attr("cy", height / 2)
+                .attr("fill", "none")
+                .attr("stroke", "gray")
+                .attr("r", function(d){ return radialScale(d); });
+
+      radarsvg.selectAll(".ticklabel")
+          .data(ticks)
+          .enter()
+          .append("text")
+          .attr("class", "ticklabel")
+          .attr("x", width / 2 + 5)
+          .attr("y", function(d) {
+              return height / 2 - radialScale(d) - 5; // Adjust the position for proper alignment
+          })
+          .style("font-size", "15px") // S
+          .text(function(d) {
+              return d.toString();
+          });
+
+      function angleToCoordinate(angle, value){
+        let x = Math.cos(angle) * radialScale(value);
+        let y = Math.sin(angle) * radialScale(value);
+        return {"x": width / 2 + x, "y": height / 2 - y};
+      }
+
+      let attributeOrder = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"];
+
+      // Modify the featureData mapping to use the attributeOrder
+      let featureData = attributeOrder.map((attribute, i) => {
+          let angle = (Math.PI / 2) + (2 * Math.PI * i / attributeOrder.length);
+          return {
+              "name": attribute,
+              "angle": angle,
+              "line_coord": angleToCoordinate(angle, 150),
+              "label_coord": angleToCoordinate(angle, 170)
+          };
+      });
+
+      //console.log(featureData);
+
+    // Rest of your code remains the same
+    // draw axis line
+    radarsvg.selectAll("line")
+        .data(featureData)
+        .enter().append("line")
+        .attr("x1", width / 2)
+        .attr("y1", height / 2)
+        .attr("x2", d => d.line_coord.x)
+        .attr("y2", d => d.line_coord.y)
+        .attr("stroke","black");
+
+    // draw axis label
+    radarsvg.selectAll(".axislabel")
+        .data(featureData)
+        .enter()
+        .append("text")
+        .attr("x", d => d.label_coord.x)
+        .attr("y", d => d.label_coord.y)
+        .text(d => d.name);
+    // Define the maximum value for your data (you can adjust this based on your data)
+  let maxValue = 150;
+
+  // Create a scale for mapping data values to the radial positions
+  let dataScale = d3.scaleLinear()
+      .domain([0, maxValue])
+      .range([0, radialScale(maxValue)]);
+
+  // Create a function to convert data values to coordinates on the radar chart
+  function dataToCoordinates(data) {
+      return featureData.map((attribute) => {
+          let angle = attribute.angle;
+          // let radius = dataScale(data[attribute.name]);
+          let radius = data[attribute.name]
+          return angleToCoordinate(angle, radius);
+      });
+  }
+
+d3.csv("All_Pokemon.csv").then(function (data) {
+    radarsvg.selectAll("polygon").remove();
+    let radatData = [];
+    let MyType;
+
+    data.forEach(function(d) {
+        if(d.Name == name) {
+            MyType = d.Type1;
+            radatData.push({
+                name: d.Name,
+                hp: +d.HP,
+                attack: +d.Att,
+                defense: +d.Def,
+                sp_attack: +d.Spa,
+                sp_defense: +d.Spd,
+                speed: +d.Spe,
+                total: +d.Att + +d.HP + +d.Def + +d.Spa + +d.Spd + +d.Spe
+            });
+        }
+    });
+    let fillColor;
+    switch (MyType) {
+      case "Grass":
+          fillColor = "darkgreen";
+          break;
+      case "Fire":
+          fillColor = "red";
+          break;
+      case "Water":
+          fillColor = "darkblue";
+          break;
+      case "Normal":
+          fillColor = "gray";
+          break;
+      case "Ground":
+          fillColor = "saddlebrown";
+          break;
+      case "Bug":
+          fillColor = "limegreen";
+          break;
+      case "Rock":
+          fillColor = "burlywood";
+          break;
+      case "Electric":
+          fillColor = "yellow";
+          break;
+      case "Ice":
+          fillColor = "lightblue";
+          break;
+      case "Steel":
+          fillColor = "teal";
+          break;
+      case "Poison":
+          fillColor = "purple";
+          break;
+      case "Flying":
+          fillColor = "lightskyblue";
+          break;
+      case "Ghost":
+          fillColor = "dimgray";
+          break;
+      case "Dark":
+          fillColor = "darkpurple";
+          break;
+      case "Fairy":
+          fillColor = "lightpink";
+          break;
+      case "Psychic":
+          fillColor = "deeppink";
+          break;
+      case "Dragon":
+          fillColor = "indigo";
+          break;
+      default:
+          fillColor = "blue"; // Default color
+  }
+
+  let dataCoordinates = dataToCoordinates(radatData[0]);
+
+  radatData.forEach(function (d) {
+      //console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
+  });
+
+    // Draw the radar chart using the dataCoordinates
+  radarsvg.append("polygon")
+    .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
+    .attr("stroke", "blue") // Adjust the stroke color
+    .attr("fill", fillColor) // Adjust the fill color
+    .attr("opacity", 0.6); // Adjust the opacity
+});
+
+  });
+  // Convert the data point to coordinates
+  
+}
+
+
+// 更新图片的函数
+function updateImages(name) 
+{
+  //name = name.split('-').join('');
+  var lowercaseName = name.toLowerCase();
+  //console.log(name);
+  //console.log(typeof name);
+  
+  var imageContainer = document.getElementById("imageContainer")
+  var imagePath = "images/";
+  imageContainer.style.position = "absolute";
+  imageContainer.style.left = "400px";  // 設定水平座標
+  imageContainer.style.top = "3000px";    // 設定垂直座標
+
+  // 清空之前的图片
+  imageContainer.innerHTML = "";
+  var img = document.createElement("img");
+  img.src = imagePath + lowercaseName+".png";
+  img.alt = "Image";
+  img.width = 200;
+  imageContainer.appendChild(img);
+}
+
+
+var evolutionInfo;
+var evolutionIndex;
+function evolution(evolutionInfo,evolutionIndex) 
+{
+  console.log("the if can evolve"+evolutionInfo);
+  console.log(evolutionIndex);
+  //var evolutionButton = d3.select("#evolution");
+  if (evolutionInfo == 0.0) {
+    //evolutionButton.style("display", "block");
+    d3.csv("All_Pokemon.csv").then(function (data) {
+      // 在数据中查找Number为evolutionIndex的Pokemon
+      var selectedData = data.find(function (d) {
+        return +d.Number === evolutionIndex; // 使用+将字符串转换为数字
+      });
+      evolutionInfo=selectedData.FinalEvolution;
+      evolutionIndex = parseInt(selectedData.Number) + 1;
+      console.log(evolutionIndex);
+      //console.log(selectedData.Name);
+      d3.select("#dropdown").property("value", selectedData.Number);
+      // 在这里执行其他操作，例如更新可视化或其他处理
+      // 这里只是一个简单的例子，你可以根据实际需求进行操作
+      draw_radar(selectedData.Name);
+      updateImages(selectedData.Name);
+      
+    });
+  }
+  else
+  {
+    //evolutionButton.style("display", "none");
+  }
+}
+
+//呼叫這個改Menu
+updateMenu("Grass",1);
+function updateMenu(type,generation)
+{
+  console.log(type+generation);
+  d3.csv("All_Pokemon.csv").then(function(data)
+  {
+    // 選擇下拉式選單
+        var filteredData = data.filter(function (d) {
+          return d.Type1 === type && +d.Generation === +generation; // 使用+将字符串转换为数字
+        });
+        console.log(filteredData);
+        var selectMenu = d3.select("#dropdown")
+        .on("change", function() {
+        // 獲取選擇的值
+        var selectedValue = d3.select(this).property("value");
+        // 獲取當前選擇的 option 元素
+        var selectedOption = d3.select(this).select("option:checked");
+        //進化
+        var selectedData = data[selectedValue - 1];
+        evolutionInfo = selectedData['FinalEvolution'];
+        evolutionIndex = parseInt(selectedValue) + 1;
+        //console.log(evolutionIndex)
+        //console.log(evolutionInfo)
+        // 獲取當前選擇的 option 的文字內容
+        var selectedText = selectedOption.text();
+        var selectedName = selectedText.split(' ')[1];
+        
+        //console.log(selectedName);
+        // 在這裡執行相應的操作，例如更新視覺化或其他處理
+        // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
+        //console.log("Selected Value: " + selectedValue);
+        //console.log("Selected Text: " + selectedText);
+        draw_radar(selectedName);
+        updateImages(selectedName);
+        });
+        selectMenu.style("position", "absolute")
+              .style("left", "0px")
+              .style("top", "3100px");
+
+      // 使用 Map 來存儲每個 Number 的第一筆資料
+        var firstDataMap = new Map();
+    // 過濾數據，只保留每個 Number 的第一筆資料
+        filteredData.forEach(function(d) {
+        if (!firstDataMap.has(d.Number)) {
+            firstDataMap.set(d.Number, d);
+        }
+    });
+    var first=1;
+    // 將過濾後的資料填充到下拉式選單中
+    selectMenu.append("option")
+            .attr("value", 0)
+            .text(function(d) { return "choose your pokemon" });
+    firstDataMap.forEach(function(value, key) {
+        selectMenu.append("option")
+            .attr("value", value.Number)
+            .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
+    });
+
+  });
+}
