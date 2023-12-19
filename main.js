@@ -24,6 +24,7 @@ function scrollToView(targetId) {
   }
 }
 
+
 // set the dimensions and margins of the graph
 var width = 1000;
 var height = 1000;
@@ -99,7 +100,7 @@ d3.csv("data.csv").then(function (data) {
 
   // Create an array of unique generations (1-7)
   var generations = Array.from({ length: 7 }, (_, i) => i + 1);
-  console.log(generations);
+  //console.log(generations);
 
   // Create a new array with type, generation, and number of Pokemon
   var result = [];
@@ -107,17 +108,17 @@ d3.csv("data.csv").then(function (data) {
   types.forEach(type => {
     generations.forEach(gen => {
       var count = data.filter(d => (d.type1 === type || d.type2 === type) && +d.generation === gen).length;
-      console.log(count);
+      //console.log(count);
       result.push({ type: type, generation: gen, number: count });
     });
   });
 
-  console.log(result);
+  //console.log(result);
 
   // Extracting type names for the color scale domain
   var typeNames = [...new Set(result.map(d => d.type))];
 
-  console.log(typeNames);
+  //console.log(typeNames);
 
   // Size scale for bubbles
   var size = d3.scaleLinear()
@@ -249,6 +250,8 @@ d3.csv("data.csv").then(function (data) {
 
 });
 
+
+
 // append the svg object to the body of the page
 var radarsvg = d3.select("#radar")
     .append("svg")
@@ -259,7 +262,7 @@ var radarsvg = d3.select("#radar")
 function draw_radar(name)
 {
   d3.csv("data.csv").then(function (data) {
-      console.log(data);
+      //console.log(data);
 
       let radatData = [];
       data.forEach(function(d) {
@@ -274,7 +277,7 @@ function draw_radar(name)
               total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
           });
       });
-      console.log("radarData"+radatData);
+      //console.log("radarData"+radatData);
 
       let radialScale = d3.scaleLinear()
           .domain([0,100])
@@ -326,7 +329,7 @@ function draw_radar(name)
           };
       });
 
-      console.log(featureData);
+      //console.log(featureData);
 
     // Rest of your code remains the same
     // draw axis line
@@ -369,7 +372,7 @@ function draw_radar(name)
     radarsvg.selectAll("polygon").remove();
     let radatData = [];
     let MyType;
-    console.log(name);
+    //console.log(name);
     data.forEach(function(d) {
         if(d.Name == name) {
             MyType = d.Type1;
@@ -445,7 +448,7 @@ function draw_radar(name)
   let dataCoordinates = dataToCoordinates(radatData[0]);
 
   radatData.forEach(function (d) {
-      console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
+      //console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
   });
 
     // Draw the radar chart using the dataCoordinates
@@ -465,8 +468,8 @@ function updateImages(name)
 {
   //name = name.split('-').join('');
   var lowercaseName = name.toLowerCase();
-  console.log(name);
-  console.log(typeof name);
+  //console.log(name);
+  //console.log(typeof name);
   
   var imageContainer = document.getElementById("imageContainer")
   var imagePath = "images/";
@@ -487,7 +490,7 @@ var evolutionInfo;
 var evolutionIndex;
 function evolution(evolutionInfo,evolutionIndex) 
 {
-  console.log(evolutionInfo);
+  console.log("the if can evolve"+evolutionInfo);
   console.log(evolutionIndex);
   //var evolutionButton = d3.select("#evolution");
   if (evolutionInfo == 0.0) {
@@ -498,7 +501,9 @@ function evolution(evolutionInfo,evolutionIndex)
         return +d.Number === evolutionIndex; // 使用+将字符串转换为数字
       });
       evolutionInfo=selectedData.FinalEvolution;
-      console.log(selectedData.Name);
+      evolutionIndex = parseInt(selectedData.Number) + 1;
+      console.log(evolutionIndex);
+      //console.log(selectedData.Name);
       d3.select("#dropdown").property("value", selectedData.Number);
       // 在这里执行其他操作，例如更新可视化或其他处理
       // 这里只是一个简单的例子，你可以根据实际需求进行操作
@@ -512,57 +517,67 @@ function evolution(evolutionInfo,evolutionIndex)
     //evolutionButton.style("display", "none");
   }
 }
-d3.csv("All_Pokemon.csv").then(function(data) {
-  // 選擇下拉式選單
-      var selectMenu = d3.select("#dropdown")
-      .on("change", function() {
-      // 獲取選擇的值
-      var selectedValue = d3.select(this).property("value");
-      // 獲取當前選擇的 option 元素
-      var selectedOption = d3.select(this).select("option:checked");
-      
-      //進化
-      var selectedData = data[selectedValue - 1];
-      evolutionInfo = selectedData['FinalEvolution'];
-      evolutionIndex = parseInt(selectedValue) + 1;
-      console.log(evolutionIndex)
-      // 獲取當前選擇的 option 的文字內容
-      var selectedText = selectedOption.text();
-      var selectedName = selectedText.split(' ')[1];
-      
-      console.log(selectedName);
-      // 在這裡執行相應的操作，例如更新視覺化或其他處理
-      // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
-      console.log("Selected Value: " + selectedValue);
-      console.log("Selected Text: " + selectedText);
-      draw_radar(selectedName);
-      updateImages(selectedName);
-      });
-      selectMenu.style("position", "absolute")
-            .style("left", "0px")
-            .style("top", "3100px");
+//呼叫這個改Menu
+updateMenu("Grass",1);
+function updateMenu(type,generation)
+{
+  console.log(type+generation);
+  d3.csv("All_Pokemon.csv").then(function(data)
+  {
+    // 選擇下拉式選單
+        var filteredData = data.filter(function (d) {
+          return d.Type1 === type && +d.Generation === +generation; // 使用+将字符串转换为数字
+        });
+        console.log(filteredData);
+        var selectMenu = d3.select("#dropdown")
+        .on("change", function() {
+        // 獲取選擇的值
+        var selectedValue = d3.select(this).property("value");
+        // 獲取當前選擇的 option 元素
+        var selectedOption = d3.select(this).select("option:checked");
+        //進化
+        var selectedData = data[selectedValue - 1];
+        evolutionInfo = selectedData['FinalEvolution'];
+        evolutionIndex = parseInt(selectedValue) + 1;
+        //console.log(evolutionIndex)
+        //console.log(evolutionInfo)
+        // 獲取當前選擇的 option 的文字內容
+        var selectedText = selectedOption.text();
+        var selectedName = selectedText.split(' ')[1];
+        
+        //console.log(selectedName);
+        // 在這裡執行相應的操作，例如更新視覺化或其他處理
+        // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
+        //console.log("Selected Value: " + selectedValue);
+        //console.log("Selected Text: " + selectedText);
+        draw_radar(selectedName);
+        updateImages(selectedName);
+        });
+        selectMenu.style("position", "absolute")
+              .style("left", "0px")
+              .style("top", "3100px");
 
-    // 使用 Map 來存儲每個 Number 的第一筆資料
-  var firstDataMap = new Map();
-  // 過濾數據，只保留每個 Number 的第一筆資料
-  data.forEach(function(d) {
-      if (!firstDataMap.has(d.Number)) {
-          firstDataMap.set(d.Number, d);
-      }
-  });
-  var first=1;
-  // 將過濾後的資料填充到下拉式選單中
-  selectMenu.append("option")
-          .attr("value", 0)
-          .text(function(d) { return "choose your pokemon" });
-  firstDataMap.forEach(function(value, key) {
-      selectMenu.append("option")
-          .attr("value", value.Number)
-          .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
-  });
-  
-});
+      // 使用 Map 來存儲每個 Number 的第一筆資料
+        var firstDataMap = new Map();
+    // 過濾數據，只保留每個 Number 的第一筆資料
+        filteredData.forEach(function(d) {
+        if (!firstDataMap.has(d.Number)) {
+            firstDataMap.set(d.Number, d);
+        }
+    });
+    var first=1;
+    // 將過濾後的資料填充到下拉式選單中
+    selectMenu.append("option")
+            .attr("value", 0)
+            .text(function(d) { return "choose your pokemon" });
+    firstDataMap.forEach(function(value, key) {
+        selectMenu.append("option")
+            .attr("value", value.Number)
+            .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
+    });
 
+  });
+}
 
 var margin = { top: 10, right: 10, bottom: 30, left: 30 };
     scatterWidth = 1000 - margin.left - margin.right;
@@ -662,13 +677,13 @@ d3.csv("All_Pokemon.csv").then(function (data) {
   function updateChart( event ) {
     var extent = event.selection;
 
-    console.log(extent)
+    //console.log(extent)
     // If no selection, back to the initial coordinate. Otherwise, update X axis domain
     if (!extent) {
       if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
       x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
       y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
-      console.log('hi')
+      //console.log('hi')
     } else {
       x.domain([x.invert(extent[0][0]), x.invert(extent[1][1])]);
       y.domain([y.invert(extent[1][1]), y.invert(extent[0][0])]);
@@ -683,11 +698,6 @@ d3.csv("All_Pokemon.csv").then(function (data) {
       .attr("cx", function (d) { return x(d.weight); })
       .attr("cy", function (d) { return y(d.height); });
   }
-  
-
-
-
-
 });
 
 
@@ -716,7 +726,7 @@ var svg_stackbar = d3.select("#stackbar")
               };
           });
   
-      console.log(pokemonData);
+      //console.log(pokemonData);
       // Now pokemonData is in the desired format
       draw_stackbar(pokemonData,pokemonData);
   });
@@ -799,7 +809,7 @@ colorScale.domain().forEach(function (key, i) {
   var legendItem = legend.append("g")
   .attr("transform", "translate(0," + (i * 20) + ")")
   .on("click", function (event, d, i) {
-      console.log("点击的属性是：" + clickedKey);
+      //console.log("点击的属性是：" + clickedKey);
       if(clickedKey==key)
       {
         clickedKey="null";
@@ -808,7 +818,7 @@ colorScale.domain().forEach(function (key, i) {
       {
         clickedKey = key; // 获取被点击的属性名称
       } 
-      console.log("点击的属性是：" + clickedKey);
+      //console.log("点击的属性是：" + clickedKey);
       // 将 PokemonData 中除了被点击的属性之外的其他属性的值设为0
       draw_new_barchart(pokemonData,pokemonData_reserve)
       
@@ -851,12 +861,12 @@ function draw_new_barchart(pokemonData,pokemonData_reserve)
     });
     if(clickedKey=="null")
     {
-      console.log("1");
+      //console.log("1");
       draw_stackbar(pokemonData_reserve,pokemonData_reserve);
     }
     else
     {
-      console.log("2");
+      //console.log("2");
       draw_stackbar(filterData,pokemonData_reserve);
     }
       
