@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function scrollToView(targetId) {
+  console.log("hi");
   var targetDiv = document.getElementById(targetId);
 
   if (targetDiv) {
@@ -642,11 +643,8 @@ svg_stackbar.append("g")
     .attr("transform", "translate(50,100)");
 // 创建图例
 var legend = svg_stackbar.append("g")
-.attr("transform", "translate(" + (width - 100) + "," + 20 + ")");  // 调整图例位置
-// 在创建图例时保存每个属性的可见性状态
-// 为每个属性创建图例条目
+.attr("transform", "translate(" + (width - 100) + "," + 20 + ")"); 
 colorScale.domain().forEach(function (key, i) {
-  
   var legendItem = legend.append("g")
   .attr("transform", "translate(0," + (i * 20) + ")")
   .on("click", function (event, d, i) {
@@ -712,8 +710,6 @@ function draw_new_barchart(pokemonData,pokemonData_reserve)
     }
       
 } 
-
-
 /* --------------------------------------------------------------------------------------------------------*/
 /* ----------------------------------------------Radar plot------------------------------------------------*/
 /* --------------------------------------------------------------------------------------------------------*/
@@ -928,8 +924,10 @@ d3.csv("All_Pokemon.csv").then(function (data) {
   
 }
 
+/* --------------------------------------------------------------------------------------------------------*/
+/* ----------------------------------------------UpdateImages------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
 
-// 更新图片的函数
 function updateImages(name) 
 {
   //name = name.split('-').join('');
@@ -940,7 +938,7 @@ function updateImages(name)
   var imageContainer = document.getElementById("imageContainer")
   var imagePath = "images/";
   imageContainer.style.position = "absolute";
-  imageContainer.style.left = "400px";  // 設定水平座標
+  imageContainer.style.left = "900px";  // 設定水平座標
   imageContainer.style.top = "3000px";    // 設定垂直座標
 
   // 清空之前的图片
@@ -985,7 +983,9 @@ function evolution(evolutionInfo,evolutionIndex)
   }
 }
 
-//呼叫這個改Menu
+/* --------------------------------------------------------------------------------------------------------*/
+/* ----------------------------------------------UpdateMenu------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
 updateMenu("Grass",1);
 function updateMenu(type,generation)
 {
