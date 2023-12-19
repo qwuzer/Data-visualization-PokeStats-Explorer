@@ -41,7 +41,7 @@ body {
 #circular_packing button {
     /* background-image: url('bg.png'); */
     position: absolute;
-    top: 50px;
+    top: 60px;
     left: 50px;
     z-index: 1;
     font-weight: 400;
@@ -56,7 +56,7 @@ body {
 #scatter button {
     /* background-image: url('bg.png'); */
     position: absolute;
-    top: 1000px;
+    top: 1050px;
     left: 50px;
     font-weight: 400;
     font-size: 16px; /* Adjust the font size to make the text larger */
@@ -66,6 +66,7 @@ body {
     border: none; /* Specify a border style along with the color */
     background-color: blue;
     color: white;
+    z-index: 2;
 }
 #stackbar button {
     /* background-image: url('bg.png'); */
@@ -80,6 +81,7 @@ body {
     border: none; /* Specify a border style along with the color */
     background-color: blue;
     color: white;
+    z-index: 2;
 }
 #radar #evolution{
     /* background-image: url('bg.png'); */
@@ -94,6 +96,138 @@ body {
     border: none; /* Specify a border style along with the color */
     background-color: blue;
     color: white;
+    z-index: 5;
+}
+#Chart1_title {
+    position: absolute;
+    top: 250px; /* 调整上边距 */
+    left:50px;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+}
+#Chart1_content {
+    position: absolute;
+    top: 650px; /* 调整上边距 */
+    left:150px;
+    font-family: 'Pokemon Solid', sans-serif;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+    z-index: 2;
+}
+#Chart1_professor{
+    position: absolute;
+    top: 350px;
+    left: 250px;
+}
+#Chart1_conversation{
+    position: absolute;
+    transform: scale(3);
+    top: 500px;
+    left: 150px;
+    z-index: 1;
+}
+#Chart2_title {
+    position: absolute;
+    top: 1250px; /* 调整上边距 */
+    left:50px;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+}
+#Chart2_content {
+    position: absolute;
+    top: 1650px; /* 调整上边距 */
+    left:150px;
+    font-family: 'Pokemon Solid', sans-serif;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+    z-index: 2;
+}
+#Chart2_professor{
+    position: absolute;
+    top: 1350px;
+    left: 250px;
+}
+#Chart2_conversation{
+    position: absolute;
+    transform: scale(3);
+    top: 1500px;
+    left: 150px;
+    z-index: 1;
+}
+#Chart3_title {
+    position: absolute;
+    top: 2250px; /* 调整上边距 */
+    left:50px;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+}
+#Chart3_content {
+    position: absolute;
+    top: 2650px; /* 调整上边距 */
+    left:150px;
+    font-family: 'Pokemon Solid', sans-serif;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+    z-index: 2;
+}
+#Chart3_professor{
+    position: absolute;
+    top: 2350px;
+    left: 250px;
+}
+#Chart3_conversation{
+    position: absolute;
+    transform: scale(3);
+    top: 2500px;
+    left: 150px;
+    z-index: 1;
+}
+#Chart4_title {
+    position: absolute;
+    top: 3250px; /* 调整上边距 */
+    left:50px;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+}
+#Chart4_content {
+    position: absolute;
+    top: 3650px; /* 调整上边距 */
+    left:150px;
+    font-family: 'Pokemon Solid', sans-serif;
+    /*left: 50%; /* 将 left 设置为 50%，使其居中 */
+    /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
+    text-align: center; /* 文字居中 */
+    padding: 20px; /* 添加一些内边距 */
+    z-index: 2;
+}
+#Chart4_professor{
+    position: absolute;
+    top: 3350px;
+    left: 250px;
+}
+#Chart4_conversation{
+    position: absolute;
+    transform: scale(3);
+    top: 3500px;
+    left: 150px;
+    z-index: 1;
+}
+#dropdown{
+    z-index: 5;
 }
 
 
