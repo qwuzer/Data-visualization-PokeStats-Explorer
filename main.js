@@ -846,17 +846,10 @@ function updateMenu(type,generation)
         var selectedData = data[selectedValue - 1];
         evolutionInfo = selectedData['FinalEvolution'];
         evolutionIndex = parseInt(selectedValue) + 1;
-        //console.log(evolutionIndex)
-        //console.log(evolutionInfo)
-        // 獲取當前選擇的 option 的文字內容
+
         var selectedText = selectedOption.text();
         var selectedName = selectedText.split(' ')[1];
-        
-        //console.log(selectedName);
-        // 在這裡執行相應的操作，例如更新視覺化或其他處理
-        // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
-        //console.log("Selected Value: " + selectedValue);
-        //console.log("Selected Text: " + selectedText);
+
         draw_radar(selectedName);
         updateImages(selectedName);
         });
