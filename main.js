@@ -1,20 +1,29 @@
+// function disableScroll() {
+//   document.body.style.overflow = 'hidden';
+// }
+
+document.addEventListener('DOMContentLoaded', function () {
+  disableScroll();
+});
+
 function scrollToView(targetId) {
-  // Get the target div to scroll to
   var targetDiv = document.getElementById(targetId);
 
-  // Set display property for the target div to 'block'
   if (targetDiv) {
       targetDiv.style.display = 'block';
 
-      // Scroll to the target div
       targetDiv.scrollIntoView({
           behavior: 'smooth'
       });
 
-      // Add lock-scroll class to body after reaching the target div
       document.body.classList.add('lock-scroll');
+
   }
 }
+
+/* --------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------Circular packing--------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
 
 // set the dimensions and margins of the graph
 var width = 1000;
@@ -23,24 +32,26 @@ var height = 1000;
 // append the svg object to the body of the page
 var svg = d3.select("#circular_packing")
   .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .style("position", "absolute")  // Set position to absolute
-    .style("top", "50px")           // Set the top position
-    .style("left", "500px");         // Set the left position
+  .attr("width", width)
+  .attr("height", height)
+  .style("position", "relative")  
+  .style("top", "50px")           
+  .style("left", "500px");       
 
 var Tooltip = d3.select("body")
   .append("div")
   .style("opacity", 0)
   .attr("class", "tooltip")
   .style("position", "absolute")
+  .style("z-index", "10")
   .style("background-color", "white")
   .style("border", "solid")
   .style("border-width", "2px")
   .style("border-radius", "5px")
-  .style("padding", "5px");
+  .style("padding", "5px")
+  .style("pointer-events", "none");
 
-  
+
 d3.csv("data.csv").then(function (data) {
   var generations = [1, 2, 3, 4, 5, 6, 7];
   var generationSelection = svg.append("g")
@@ -76,9 +87,12 @@ d3.csv("data.csv").then(function (data) {
               return nodeData.generation === +genNumber ? 1 : 0.3;
           });
           
-      
           generationBoxes.classed("selected", false);
           genBox.classed("selected", true);
+
+          filterScatter(genNumber);
+          console.log(genNumber);
+
       } else {
           // Reset settings
           node.style("fill-opacity", 0.8);
@@ -91,7 +105,7 @@ d3.csv("data.csv").then(function (data) {
 
   // Create an array of unique generations (1-7)
   var generations = Array.from({ length: 7 }, (_, i) => i + 1);
-  console.log(generations);
+  //console.log(generations);
 
   // Create a new array with type, generation, and number of Pokemon
   var result = [];
@@ -99,17 +113,17 @@ d3.csv("data.csv").then(function (data) {
   types.forEach(type => {
     generations.forEach(gen => {
       var count = data.filter(d => (d.type1 === type || d.type2 === type) && +d.generation === gen).length;
-      console.log(count);
+      //console.log(count);
       result.push({ type: type, generation: gen, number: count });
     });
   });
 
-  console.log(result);
+  //console.log(result);
 
   // Extracting type names for the color scale domain
   var typeNames = [...new Set(result.map(d => d.type))];
 
-  console.log(typeNames);
+  //console.log(typeNames);
 
   // Size scale for bubbles
   var size = d3.scaleLinear()
@@ -228,10 +242,10 @@ d3.csv("data.csv").then(function (data) {
     var tooltipOffsetX = 20;
     var tooltipOffsetY = 10;
 
-    Tooltip
-      .html('<u>' + d.type + ' Gen ' + d.generation + '</u>' + "<br>" + d.number + " Pokemon")
-      .style("left", (event.pageX + tooltipOffsetX) + "px")
-      .style("top", (event.pageY - tooltipOffsetY) + "px");
+  Tooltip
+    .html('<u>' + d.type + ' Gen ' + d.generation + '</u>' + "<br>" + d.number + " Pokemon")
+    .style("left", (event.pageX + tooltipOffsetX) + "px")
+    .style("top", (event.pageY - tooltipOffsetY) + "px");
   }
 
   function mouseleave(event, d) {
@@ -240,6 +254,469 @@ d3.csv("data.csv").then(function (data) {
   }
 
 });
+
+/* --------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------Scatter plot------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
+
+var margin = { top: 10, right: 10, bottom: 30, left: 30 };
+    scatterWidth = 1200 - margin.left - margin.right;
+    scatterHeight = 1000 - margin.top - margin.bottom;
+
+var scattersvg = d3.select("#scatter")
+  .append("svg")
+  .attr("width", scatterWidth + margin.left + margin.right)
+  .attr("height", scatterHeight + margin.top + margin.bottom)
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var scatterG =  scattersvg.append("g")
+  .attr("width", scatterWidth - 200 )
+  .attr("height", scatterHeight);
+
+
+function filterScatter( generation ) {
+
+  d3.csv("All_Pokemon.csv").then(function (data) {
+    var scatterData = data
+        .filter(function(d) {
+            return +d.Generation === +generation;
+        })
+        .map(function(d) {
+            return {
+                weight: +d.Weight,
+                height: +d.Height,
+                type1: d.Type1,
+                name: d.Name,
+                number: d.Number,
+                bmi: d.BMI
+            };
+        });
+      
+        console.log(scatterData);
+    draw_scatter(scatterData);
+
+  });
+}
+
+function draw_scatter(data) {
+  scatterG.selectAll("*").remove();
+
+  var typeColorMap = {};
+  var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+  data.forEach(function (d) {
+    typeColorMap[d["type1"]] = color(d["type1"]);
+  });
+
+
+  // Scale and axis setup
+  var x = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.weight)])
+    // .domain([0, 1000])
+    .range([0, scatterWidth - 200 ]);
+
+  var xaxis = scatterG.append("g")
+    .attr("transform", "translate(20," + (scatterHeight - 50) + ")")
+    .call(d3.axisBottom(x));
+
+  var y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.height)])
+    .range([scatterHeight - 50 , 0]);
+
+  var yaxis = scatterG.append("g")
+    .attr("transform", "translate(20,0)")
+    .call(d3.axisLeft(y));
+
+  // Add legend
+  var legend = scattersvg.selectAll(".legend")
+    .data(Object.keys(typeColorMap))
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+  // Draw legend color blocks
+  legend.append("rect")
+    .attr("x", scatterWidth + margin.right - 38)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", d => typeColorMap[d]);
+
+  // Add legend text
+  legend.append("text")
+    .attr("x", scatterWidth - margin.right - 44)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text(d => d);
+
+  // Add brushing and zooming(Added before tooltip to prevent tooltip from being covered)
+  var brush = d3.brush()
+    .extent([[20,0], [scatterWidth - 200 + 20 , scatterHeight - 50]])
+    .on("end", updateChart);
+
+  scatterG.append("g")
+    .attr("class", "brush")
+    .call(brush);
+
+  // Draw points
+  var dots = scatterG.selectAll(".dot")
+    .data(data)
+    .enter().append("circle")
+    .attr("class", "dot")
+    .attr("r", 5)
+    .attr("cx", d => x(d.weight) + 20 )
+    .attr("cy", d => y(d.height) )
+    .attr("name", d => d.Number)
+    .style("fill", d => typeColorMap[d["type1"]])
+    .on("mouseover", mouseover)
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave);
+
+  var idleTimeout;
+  function idled() {
+     idleTimeout = null;
+  }
+
+  function updateChart( event ) {
+    var extent = event.selection;
+
+    // If no selection, back to the initial coordinate. Otherwise, update X axis domain
+    if (!extent) {
+      if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
+        x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
+        y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
+            // Update axis and circle position
+        xaxis.transition().duration(1000).call(d3.axisBottom(x));
+        yaxis.transition().duration(1000).call(d3.axisLeft(y));
+        scatterG.selectAll(".dot")
+          .transition().duration(1000)
+          .attr("cx", function (d) { return x(d.weight)  + 20; })
+          .attr("cy", function (d) { return y(d.height) ; });
+    } else {
+      x.domain([x.invert(extent[0][0]), x.invert(extent[1][0])]);
+      y.domain([y.invert(extent[1][1]), y.invert(extent[0][1])]);
+      scatterG.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
+      // Update axis and circle position
+      xaxis.transition().duration(1000).call(d3.axisBottom(x));
+      yaxis.transition().duration(1000).call(d3.axisLeft(y));
+      scatterG.selectAll(".dot")
+        .transition().duration(1000)
+        .attr("cx", function (d) { return x(d.weight) +  200; })
+        .attr("cy", function (d) { return y(d.height) ; });
+    }
+  }
+
+  function mouseover(event, d) {
+    Tooltip
+      .style("opacity", 1);
+  }
+
+  function mousemove(event, d) {
+    var tooltipOffsetX = 20;
+    var tooltipOffsetY = 10;
+    Tooltip
+      .html(d.name + '<br>' +  " Weight: " + d.weight + "kg" +  ' Height: ' + d.height + "m" + '<br>' + " BMI: " + d.bmi)
+      .style("left", (event.pageX + tooltipOffsetX) + "px")
+      .style("top", (event.pageY - tooltipOffsetY) + "px");
+  }
+
+  function mouseleave(event, d) {
+    Tooltip
+      .style("opacity", 0);
+  }
+}
+
+
+// function draw_scatter(scatterData) {
+
+//   d3.csv("All_Pokemon.csv").then(function (data) {
+//     // Create a type-to-color mapping
+//     var typeColorMap = {};
+//     var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+//     data.forEach(function (d) {
+//       d.weight = +d.Weight;
+//       d.height = +d.Height;
+//       typeColorMap[d["Type1"]] = color(d["Type1"]);
+//     });
+
+//     // Scale and axis setup
+//     var x = d3.scaleLinear()
+//       // .domain([0, d3.max(data, d => d.weight)])
+//       .domain([0, 1000])
+//       .range([0, scatterWidth - 200 ]);
+
+//     var xaxis = scatterG.append("g")
+//       .attr("transform", "translate(20," + (scatterHeight - 50) + ")")
+//       .call(d3.axisBottom(x));
+
+//     var y = d3.scaleLinear()
+//       .domain([0, d3.max(data, d => d.height)])
+//       .range([scatterHeight - 50 , 0]);
+
+//     var yaxis = scatterG.append("g")
+//       .attr("transform", "translate(20,0)")
+//       .call(d3.axisLeft(y));
+
+//     // Add legend
+//     var legend = scattersvg.selectAll(".legend")
+//       .data(Object.keys(typeColorMap))
+//       .enter().append("g")
+//       .attr("class", "legend")
+//       .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+//     // Draw legend color blocks
+//     legend.append("rect")
+//       .attr("x", scatterWidth + margin.right - 38)
+//       .attr("width", 18)
+//       .attr("height", 18)
+//       .style("fill", d => typeColorMap[d]);
+
+//     // Add legend text
+//     legend.append("text")
+//       .attr("x", scatterWidth - margin.right - 44)
+//       .attr("y", 9)
+//       .attr("dy", ".35em")
+//       .style("text-anchor", "end")
+//       .text(d => d);
+
+//     // Draw points
+//     var dots = scatterG.selectAll(".dot")
+//       .data(data)
+//       .enter().append("circle")
+//       .attr("class", "dot")
+//       .attr("r", 3.5)
+//       .attr("cx", d => x(d.weight) + 20 )
+//       .attr("cy", d => y(d.height) )
+//       .attr("name", d => d.Number)
+//       .style("fill", d => typeColorMap[d["Type1"]]);
+
+//     // Add brushing and zooming
+//     var brush = d3.brush()
+//       .extent([[20,0], [scatterWidth - 200 + 20 , scatterHeight - 50]])
+//       .on("end", updateChart);
+
+//     scatterG.append("g")
+//       .attr("class", "brush")
+//       .call(brush);
+
+//     var idleTimeout;
+//     function idled() { idleTimeout = null; }
+
+//     function updateChart( event ) {
+//       var extent = event.selection;
+
+//       // If no selection, back to the initial coordinate. Otherwise, update X axis domain
+//       if (!extent) {
+//         if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
+//           x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
+//           y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
+//               // Update axis and circle position
+//           xaxis.transition().duration(1000).call(d3.axisBottom(x));
+//           yaxis.transition().duration(1000).call(d3.axisLeft(y));
+//           scatterG.selectAll(".dot")
+//             .transition().duration(1000)
+//             .attr("cx", function (d) { return x(d.weight) + 20 ; })
+//             .attr("cy", function (d) { return y(d.height) ; });
+//       } else {
+//         x.domain([x.invert(extent[0][0]), x.invert(extent[1][0])]);
+//         y.domain([y.invert(extent[1][1]), y.invert(extent[0][1])]);
+//         scatterG.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
+//         // Update axis and circle position
+//         xaxis.transition().duration(1000).call(d3.axisBottom(x));
+//         yaxis.transition().duration(1000).call(d3.axisLeft(y));
+//         scatterG.selectAll(".dot")
+//           .transition().duration(1000)
+//           .attr("cx", function (d) { return x(d.weight) + 120; })
+//           .attr("cy", function (d) { return y(d.height) ; });
+//       }
+//     }
+//   });
+// }
+
+
+
+
+/* --------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------Stackbar plot------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
+
+
+//stackbarchart
+var svg_stackbar = d3.select("#stackbar")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+   
+  d3.csv("All_Pokemon.csv").then(function(data) {
+    // Filter and map the CSV data to the desired format
+    var pokemonData = data
+        .filter(function(d) {
+            return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
+        })
+        .map(function(d) {
+            return {
+                index:d.Number, 
+                name: d.Name,
+                hp: +d.HP,
+                attack: +d.Att,
+                defense: +d.Def,
+                sp_attack: +d.Spa,
+                sp_defense: +d.Spd,
+                speed: +d.Spe
+            };
+        });
+  
+    // Now pokemonData is in the desired format
+    draw_stackbar(pokemonData,pokemonData);
+});
+
+var clickedKey="null";
+// Set up chart dimensions
+function draw_stackbar(pokemonData,pokemonData_reserve)
+{
+  svg_stackbar.selectAll("*").remove();
+  let rects = svg_stackbar.selectAll('bar_rect')
+// Set up scales and axes
+var x = d3.scaleBand()
+    .domain(pokemonData.map(function (d) { return d.name; }))
+    .range([0, 750])  // 修改范围
+    .padding(0.5);
+
+var y = d3.scaleLinear()
+    .domain([0, d3.max(pokemonData, function (d) { return d.hp + d.attack + d.defense + d.sp_attack + d.sp_defense + d.speed; })])
+    .range([height/2, 0]);
+    
+
+var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+// Stack the data
+var stack = d3.stack()
+    .keys(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone);
+
+var stackedData = stack(pokemonData);
+
+// 创建颜色比例尺，将每个属性映射到一个颜色
+var colorScale = d3.scaleOrdinal()
+    .domain(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
+    .range(['#8CC084', '#D9C277', '#BD9C46', '#7EA2A8', '#2E4D9B', '#7E587E']);
+
+var color = function(d) { return colorScale(d.key); };
+// Draw the bars
+var barchart = svg_stackbar.selectAll("g")
+    .data(stackedData)
+    .enter().append("g")
+    .attr("fill",color)
+    .selectAll("bar_rect")
+    .data(function (d) { return d; })
+    .enter().append("rect")
+    .attr("class","bar_rect")
+    .attr("x", function (d) { return x(d.data.name); })
+    .attr("width", x.bandwidth())
+    .attr("transform", "translate(50,100)")
+    .attr("height",0)
+    .attr("y", function (d) { return y(d[0]); }) // 修改这里
+    .transition() // 添加过渡效果
+    .duration(1000) // 过渡时间，单位毫秒
+    .attr("height", function (d) { return y(d[0]) - y(d[1]); })
+    .attr("y", function (d) { return y(d[1]); });
+
+// Add axes
+var xAxis = d3.axisBottom(x)
+        .tickFormat(function(d) {
+            return "#"+pokemonData.find(function(pokemon) { return pokemon.name === d; }).index;
+        });
+// 平移整个图表
+svg_stackbar.attr("transform", "translate(100, 300)");
+
+// 添加 x 轴
+svg_stackbar.append("g")
+    .attr("transform", "translate(" +50 + "," + (height / 2 + 100) + ")")  // 平移 x 轴
+    .call(xAxis);
+
+
+svg_stackbar.append("g")
+    .call(d3.axisLeft(y))
+    .attr("transform", "translate(50,100)");
+// 创建图例
+var legend = svg_stackbar.append("g")
+.attr("transform", "translate(" + (width - 100) + "," + 20 + ")");  // 调整图例位置
+// 在创建图例时保存每个属性的可见性状态
+// 为每个属性创建图例条目
+colorScale.domain().forEach(function (key, i) {
+  
+  var legendItem = legend.append("g")
+  .attr("transform", "translate(0," + (i * 20) + ")")
+  .on("click", function (event, d, i) {
+      //console.log("点击的属性是：" + clickedKey);
+      if(clickedKey==key)
+      {
+        clickedKey="null";
+      }
+      else
+      {
+        clickedKey = key; // 获取被点击的属性名称
+      } 
+      //console.log("点击的属性是：" + clickedKey);
+      // 将 PokemonData 中除了被点击的属性之外的其他属性的值设为0
+      draw_new_barchart(pokemonData,pokemonData_reserve)
+      
+  });
+
+
+legendItem.append("rect")
+    .attr("width", 18)
+    .attr("height", 18)
+    .attr("fill", colorScale(key));
+
+legendItem.append("text")
+    .attr("x", 25)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(key);
+});
+}
+
+function draw_new_barchart(pokemonData,pokemonData_reserve)
+{     
+    var filterData = pokemonData_reserve.map(function (pokemon) {
+    var filteredPokemon = {
+        name: pokemon.name,
+        index: pokemon.index,
+    };
+
+    // 设置被点击的属性值
+    filteredPokemon[clickedKey] = pokemon[clickedKey];
+
+    // 将其他五个属性的值设置为0
+    ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"].forEach(function (key) {
+        if (key !== clickedKey) {
+            filteredPokemon[key] = 0;
+        }
+    });
+
+    return filteredPokemon;
+    });
+    if(clickedKey=="null")
+    {
+      //console.log("1");
+      draw_stackbar(pokemonData_reserve,pokemonData_reserve);
+    }
+    else
+    {
+      //console.log("2");
+      draw_stackbar(filterData,pokemonData_reserve);
+    }
+      
+} 
+
+
+/* --------------------------------------------------------------------------------------------------------*/
+/* ----------------------------------------------Radar plot------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------------------*/
 
 // append the svg object to the body of the page
 var radarsvg = d3.select("#radar")
@@ -251,9 +728,8 @@ var radarsvg = d3.select("#radar")
 function draw_radar(name)
 {
   d3.csv("data.csv").then(function (data) {
-      console.log(data);
-
       let radatData = [];
+
       data.forEach(function(d) {
           radatData.push({
               name: d.name,
@@ -266,7 +742,6 @@ function draw_radar(name)
               total: +d.hp + +d.attack + +d.defense + +d.sp_attack + +d.sp_defense + +d.speed
           });
       });
-      console.log("radarData"+radatData);
 
       let radialScale = d3.scaleLinear()
           .domain([0,100])
@@ -318,7 +793,7 @@ function draw_radar(name)
           };
       });
 
-      console.log(featureData);
+      //console.log(featureData);
 
     // Rest of your code remains the same
     // draw axis line
@@ -357,11 +832,11 @@ function draw_radar(name)
       });
   }
 
-  d3.csv("All_Pokemon.csv").then(function (data) {
+d3.csv("All_Pokemon.csv").then(function (data) {
     radarsvg.selectAll("polygon").remove();
     let radatData = [];
     let MyType;
-    console.log(name);
+
     data.forEach(function(d) {
         if(d.Name == name) {
             MyType = d.Type1;
@@ -437,15 +912,15 @@ function draw_radar(name)
   let dataCoordinates = dataToCoordinates(radatData[0]);
 
   radatData.forEach(function (d) {
-      console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
+      //console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
   });
 
     // Draw the radar chart using the dataCoordinates
-    radarsvg.append("polygon")
-      .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
-      .attr("stroke", "blue") // Adjust the stroke color
-      .attr("fill", fillColor) // Adjust the fill color
-      .attr("opacity", 0.6); // Adjust the opacity
+  radarsvg.append("polygon")
+    .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
+    .attr("stroke", "blue") // Adjust the stroke color
+    .attr("fill", fillColor) // Adjust the fill color
+    .attr("opacity", 0.6); // Adjust the opacity
 });
 
   });
@@ -453,327 +928,114 @@ function draw_radar(name)
   
 }
 
-d3.csv("All_Pokemon.csv").then(function(data) {
-  // 選擇下拉式選單
-      var selectMenu = d3.select("#dropdown")
-      .on("change", function() {
-      // 獲取選擇的值
-      var selectedValue = d3.select(this).property("value");
 
-      // 獲取當前選擇的 option 元素
-      var selectedOption = d3.select(this).select("option:checked");
-
-      // 獲取當前選擇的 option 的文字內容
-      var selectedText = selectedOption.text();
-      var selectedName = selectedText.split(' ')[1];
-      // 在這裡執行相應的操作，例如更新視覺化或其他處理
-      // 這裡只是一個簡單的例子，你可以根據實際需求進行操作
-      console.log("Selected Value: " + selectedValue);
-      console.log("Selected Text: " + selectedText);
-      draw_radar(selectedName);
-          updateImages(selectedName);
-      });
-      selectMenu.style("position", "absolute")
-            .style("left", "0px")
-            .style("top", "1000px");
-
-    // 更新图片的函数
-  function updateImages(name) 
-  {
-    var lowercaseName = name.toLowerCase();
-    console.log(name);
-    console.log(typeof name);
-    
-    var imageContainer = document.getElementById("imageContainer")
-    var imagePath = "images/";
-    imageContainer.style.position = "absolute";
-    imageContainer.style.left = "400px";  // 設定水平座標
-    imageContainer.style.top = "1000px";    // 設定垂直座標
-
-    // 清空之前的图片
-    imageContainer.innerHTML = "";
-    var img = document.createElement("img");
-    img.src = imagePath + lowercaseName+".png";
-    img.alt = "Image";
-    img.width = 200;
-    imageContainer.appendChild(img);
-  }
-    // 使用 Map 來存儲每個 Number 的第一筆資料
-  var firstDataMap = new Map();
-  // 過濾數據，只保留每個 Number 的第一筆資料
-  data.forEach(function(d) {
-      if (!firstDataMap.has(d.Number)) {
-          firstDataMap.set(d.Number, d);
-      }
-  });
-  var first=1;
-  // 將過濾後的資料填充到下拉式選單中
-  selectMenu.append("option")
-          .attr("value", 0)
-          .text(function(d) { return "choose your pokemon" });
-  firstDataMap.forEach(function(value, key) {
-      selectMenu.append("option")
-          .attr("value", value.Number)
-          .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
-  });
-  
-});
-
-
-var margin = { top: 10, right: 10, bottom: 30, left: 30 };
-    scatterWidth = 1000 - margin.left - margin.right;
-    scatterHeight = 1000 - margin.top - margin.bottom;
-
-var scattersvg = d3.select("#scatter")
-  .append("svg")
-    .attr("width", scatterWidth)
-    .attr("height", scatterHeight)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-d3.csv("All_Pokemon.csv").then(function (data) {
-  // Create a type-to-color mapping
-  var typeColorMap = {};
-  var color = d3.scaleOrdinal(d3.schemeCategory10);
-
-  data.forEach(function (d) {
-    d.weight = +d.Weight;
-    d.height = +d.Height;
-    typeColorMap[d["Type1"]] = color(d["Type1"]);
-  });
-
-  // Scale and axis setup
-  var x = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.weight)])
-    .range([0, scatterWidth - 50 ]);
-
-  var xaxis = scattersvg.append("g")
-    .attr("transform", "translate(0," + (scatterHeight - 50) + ")")
-    .call(d3.axisBottom(x));
-
-  var y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.height)])
-    .range([scatterHeight - 50 , 0]);
-
-  var yaxis = scattersvg.append("g")
-    .call(d3.axisLeft(y));
-
-  // Add legend
-  var legend = scattersvg.selectAll(".legend")
-  .data(Object.keys(typeColorMap))
-  .enter().append("g")
-  .attr("class", "legend")
-  .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
-
-  // Draw legend color blocks
-  legend.append("rect")
-    .attr("x", scatterWidth - margin.right - 38)
-    .attr("width", 18)
-    .attr("height", 18)
-    .style("fill", d => typeColorMap[d]);
-
-  // Add legend text
-  legend.append("text")
-    .attr("x", scatterWidth - margin.right - 44)
-    .attr("y", 9)
-    .attr("dy", ".35em")
-    .style("text-anchor", "end")
-    .text(d => d);
-
-  // // Add a clipPath: everything out of this area won't be drawn.
-  // var clip = scattersvg.append("defs").append("svg:clipPath")
-  //   .attr("id", "clip")
-  //   .append("svg:rect")
-  //   .attr("width", scatterWidth )
-  //   .attr("height", scatterHeight  )
-  //   .attr("x", 0)
-  //   .attr("y", 0);
-  
-  // scattersvg.attr("clip-path", "url(#clip)");
-
-   // Draw points
-   var dots = scattersvg.selectAll(".dot")
-   .data(data)
-   .enter().append("circle")
-   .attr("class", "dot")
-   .attr("r", 3.5)
-   .attr("cx", d => x(d.weight))
-   .attr("cy", d => y(d.height))
-   .attr("name", d => d.Number)
-   .style("fill", d => typeColorMap[d["Type1"]]);
-
-  // Add brushing and zooming
-  var brush = d3.brush()
-    .extent([[0, 0], [scatterWidth , scatterHeight - 51]])
-    .on("end", updateChart);
-
-
-  scattersvg.append("g")
-    .attr("class", "brush")
-    .call(brush);
-
-  var idleTimeout;
-  function idled() { idleTimeout = null; }
-
-  function updateChart( event ) {
-    var extent = event.selection;
-
-    console.log(extent)
-    // If no selection, back to the initial coordinate. Otherwise, update X axis domain
-    if (!extent) {
-      if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
-      x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
-      y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
-      console.log('hi')
-    } else {
-      x.domain([x.invert(extent[0][0]), x.invert(extent[1][1])]);
-      y.domain([y.invert(extent[1][1]), y.invert(extent[0][0])]);
-      scattersvg.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
-    }
-  
-    // Update axis and circle position
-    xaxis.transition().duration(1000).call(d3.axisBottom(x));
-    yaxis.transition().duration(1000).call(d3.axisLeft(y));
-    scattersvg.selectAll(".dot")
-      .transition().duration(1000)
-      .attr("cx", function (d) { return x(d.weight); })
-      .attr("cy", function (d) { return y(d.height); });
-  }
-  
-
-
-
-
-});
-
-
-//stackbarchart
-var svg_stackbar = d3.select("#stackbar")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-   
-    d3.csv("All_Pokemon.csv").then(function(data) {
-      // Filter and map the CSV data to the desired format
-      var pokemonData = data
-          .filter(function(d) {
-              return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
-          })
-          .map(function(d) {
-              return {
-                  index:d.Number, 
-                  name: d.Name,
-                  hp: +d.HP,
-                  attack: +d.Att,
-                  defense: +d.Def,
-                  sp_attack: +d.Spa,
-                  sp_defense: +d.Spd,
-                  speed: +d.Spe
-              };
-          });
-  
-      console.log(pokemonData);
-      // Now pokemonData is in the desired format
-      draw_stackbar(pokemonData);
-  });
-// Set up chart dimensions
-function draw_stackbar(pokemonData)
+// 更新图片的函数
+function updateImages(name) 
 {
+  //name = name.split('-').join('');
+  var lowercaseName = name.toLowerCase();
+  //console.log(name);
+  //console.log(typeof name);
+  
+  var imageContainer = document.getElementById("imageContainer")
+  var imagePath = "images/";
+  imageContainer.style.position = "absolute";
+  imageContainer.style.left = "400px";  // 設定水平座標
+  imageContainer.style.top = "3000px";    // 設定垂直座標
 
-// Set up scales and axes
-var x = d3.scaleBand()
-    .domain(pokemonData.map(function (d) { return d.name; }))
-    .range([0, 750])  // 修改范围
-    .padding(0.5);
-
-var y = d3.scaleLinear()
-    .domain([0, d3.max(pokemonData, function (d) { return d.hp + d.attack + d.defense + d.sp_attack + d.sp_defense + d.speed; })])
-    .range([height/2, 0]);
-    
-
-var color = d3.scaleOrdinal(d3.schemeCategory10);
-
-// Stack the data
-var stack = d3.stack()
-    .keys(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
-    .order(d3.stackOrderNone)
-    .offset(d3.stackOffsetNone);
-
-var stackedData = stack(pokemonData);
-
-// 创建颜色比例尺，将每个属性映射到一个颜色
-var colorScale = d3.scaleOrdinal()
-    .domain(["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"])
-    .range(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
-
-var color = function(d) { return colorScale(d.key); };
-
-
-// Draw the bars
-var barchart = svg_stackbar.selectAll("g")
-    .data(stackedData)
-    .enter().append("g")
-    .attr("fill",color)
-    .selectAll("rect")
-    .data(function (d) { return d; })
-    .enter().append("rect")
-    .attr("x", function (d) { return x(d.data.name); })
-    .attr("y", function (d) { return y(d[1]); })
-    .attr("height", function (d) { return y(d[0]) - y(d[1]); })
-    .attr("width", x.bandwidth())
-    .attr("transform", "translate(50,0)");
-
-// Add axes
-var xAxis = d3.axisBottom(x)
-        .tickFormat(function(d) {
-            return "#"+pokemonData.find(function(pokemon) { return pokemon.name === d; }).index;
-        });
-// 平移整个图表
-svg_stackbar.attr("transform", "translate(100, 0)");
-
-// 添加 x 轴
-svg_stackbar.append("g")
-    .attr("transform", "translate(" +50 + "," + height / 2 + ")")  // 平移 x 轴
-    .call(xAxis);
-
-
-svg_stackbar.append("g")
-    .call(d3.axisLeft(y))
-    .attr("transform", "translate(50,0)");
-// 创建图例
-var legend = svg_stackbar.append("g")
-.attr("transform", "translate(" + (width - 100) + "," + 20 + ")");  // 调整图例位置
-// 在创建图例时保存每个属性的可见性状态
-var legendVisibility = {
-  "hp": true,
-  "attack": true,
-  "defense": true,
-  "sp_attack": true,
-  "sp_defense": true,
-  "speed": true
-};
-// 为每个属性创建图例条目
-colorScale.domain().forEach(function (key, i) {
-var legendItem = legend.append("g")
-    .attr("transform", "translate(0," + (i * 20) + ")")
-    .on("click", function () {
-      // 切换可见性状态
-      legendVisibility[key] = !legendVisibility[key];
-
-      // 根据可见性状态更新图表和图例
-      draw_stackbar(pokemonData);
-  });
-legendItem.append("rect")
-    .attr("width", 18)
-    .attr("height", 18)
-    .attr("fill", colorScale(key));
-
-legendItem.append("text")
-    .attr("x", 25)
-    .attr("y", 9)
-    .attr("dy", ".35em")
-    .style("text-anchor", "start")
-    .text(key);
-});
+  // 清空之前的图片
+  imageContainer.innerHTML = "";
+  var img = document.createElement("img");
+  img.src = imagePath + lowercaseName+".png";
+  img.alt = "Image";
+  img.width = 200;
+  imageContainer.appendChild(img);
 }
 
+
+var evolutionInfo;
+var evolutionIndex;
+function evolution(evolutionInfo,evolutionIndex) 
+{
+  console.log("the if can evolve"+evolutionInfo);
+  console.log(evolutionIndex);
+  //var evolutionButton = d3.select("#evolution");
+  if (evolutionInfo == 0.0) {
+    //evolutionButton.style("display", "block");
+    d3.csv("All_Pokemon.csv").then(function (data) {
+      // 在数据中查找Number为evolutionIndex的Pokemon
+      var selectedData = data.find(function (d) {
+        return +d.Number === evolutionIndex; // 使用+将字符串转换为数字
+      });
+      evolutionInfo=selectedData.FinalEvolution;
+      evolutionIndex = parseInt(selectedData.Number) + 1;
+      console.log(evolutionIndex);
+      //console.log(selectedData.Name);
+      d3.select("#dropdown").property("value", selectedData.Number);
+      // 在这里执行其他操作，例如更新可视化或其他处理
+      // 这里只是一个简单的例子，你可以根据实际需求进行操作
+      draw_radar(selectedData.Name);
+      updateImages(selectedData.Name);
+      
+    });
+  }
+  else
+  {
+    //evolutionButton.style("display", "none");
+  }
+}
+
+//呼叫這個改Menu
+updateMenu("Grass",1);
+function updateMenu(type,generation)
+{
+  console.log(type+generation);
+  d3.csv("All_Pokemon.csv").then(function(data)
+  {
+    // 選擇下拉式選單
+        var filteredData = data.filter(function (d) {
+          return d.Type1 === type && +d.Generation === +generation; // 使用+将字符串转换为数字
+        });
+        console.log(filteredData);
+        var selectMenu = d3.select("#dropdown")
+        .on("change", function() {
+        // 獲取選擇的值
+        var selectedValue = d3.select(this).property("value");
+        // 獲取當前選擇的 option 元素
+        var selectedOption = d3.select(this).select("option:checked");
+        //進化
+        var selectedData = data[selectedValue - 1];
+        evolutionInfo = selectedData['FinalEvolution'];
+        evolutionIndex = parseInt(selectedValue) + 1;
+
+        var selectedText = selectedOption.text();
+        var selectedName = selectedText.split(' ')[1];
+
+        draw_radar(selectedName);
+        updateImages(selectedName);
+        });
+        selectMenu.style("position", "absolute")
+              .style("left", "0px")
+              .style("top", "3100px");
+
+      // 使用 Map 來存儲每個 Number 的第一筆資料
+        var firstDataMap = new Map();
+    // 過濾數據，只保留每個 Number 的第一筆資料
+        filteredData.forEach(function(d) {
+        if (!firstDataMap.has(d.Number)) {
+            firstDataMap.set(d.Number, d);
+        }
+    });
+    var first=1;
+    // 將過濾後的資料填充到下拉式選單中
+    selectMenu.append("option")
+            .attr("value", 0)
+            .text(function(d) { return "choose your pokemon" });
+    firstDataMap.forEach(function(value, key) {
+        selectMenu.append("option")
+            .attr("value", value.Number)
+            .text(function(d) { return "#" + value['Number'] +" " +value['Name']; });
+    });
+
+  });
+}

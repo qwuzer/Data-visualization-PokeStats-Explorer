@@ -13,14 +13,8 @@
                 
     </head>
 
-    <body>
-        
+    <body>    
         <div id="circular_packing">
-            <a href="#radar">
-                <button onclick="scrollToView('radar')">Next</button>
-            </a>
-        </div>
-        <div id="radar">
             <a href="#scatter">
                 <button onclick="scrollToView('scatter')">Next</button>
             </a>
@@ -30,8 +24,14 @@
                 <button onclick="scrollToView('stackbar')">Next</button>
             </a>
         </div>
-        <div id="stackbar"></div>
-        <!-- 下拉式選單 -->
+        <div id="stackbar">
+            <a href="#radar">
+                <button onclick="scrollToView('radar')">Next</button>
+            </a>
+        </div>
+        <div id="radar">
+            <button id="evolution" onclick="evolution(evolutionInfo,evolutionIndex)">evolution</button>
+        </div>
         <select id="dropdown"></select>
         <div id="imageContainer"></div>
         <script src="https://d3js.org/d3.v6.js"></script>
