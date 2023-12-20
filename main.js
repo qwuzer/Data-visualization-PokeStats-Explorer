@@ -1,10 +1,10 @@
-function disableScroll() {
-  document.body.style.overflow = 'hidden';
-}
+// function disableScroll() {
+//   document.body.style.overflow = 'hidden';
+// }
 
-document.addEventListener('DOMContentLoaded', function () {
-  disableScroll();
-});
+// document.addEventListener('DOMContentLoaded', function () {
+//   disableScroll();
+// });
 
 function scrollToView(targetId) {
   console.log("hi");
@@ -57,53 +57,66 @@ d3.csv("data.csv").then(function (data) {
   var generations = [1, 2, 3, 4, 5, 6, 7];
   var generationSelection = svg.append("g")
     .attr("id", "generation-selection")
-    .attr("transform", "translate(50, 200)");
+    .attr("transform", "translate(150,0)");
 
   var color = d3.scaleOrdinal(d3.schemeCategory10);
   
-  var boxWidth = 40;
+  var boxWidth = 100;
   var boxHeight = 40;
 
   var generationBoxes = generationSelection.selectAll(".generation-box")
     .data(generations)
     .enter()
-    .append("rect")
+    .append("g")
+    .attr("class", "generation-box-group")
+    .attr("id", function (d, i) { return i + 1; }) // Set the id of each box to the generation number
+    .attr("transform", function (d, i) { return "translate(" + i * boxWidth + ", 0)"; });
+
+  generationBoxes.append("rect")
     .attr("class", "generation-box")
-    .attr("id", function (d, i) { return i + 1;})// Set the id of each box to the generation number
-    .attr("x", function (d, i) { return i * boxHeight; }) 
-    .attr("y", 0) 
-    .attr("width", boxWidth) 
-    .attr("height", boxHeight) 
-    .style("fill", "lightgray") 
+    .attr("width", boxWidth)
+    .attr("height", boxHeight)
+    .style("fill", d => color(d))
     .style("stroke", "black")
-    .style("opacity", 0.5) // Set the initial opacity
-    .on("click", function (event, d) {
-      var genBox = d3.select(this);
-      var isSelected = genBox.classed("selected");
+    .style("opacity", 0.5); // Set the initial opacity
 
-      generationBoxes.style("opacity", 0.5);  
-      if (!isSelected) {
-          genBox.style("opacity", 1);
+  generationBoxes.append("text")
+    .attr("class", "generation-text")
+    .attr("x", boxWidth / 2)
+    .attr("y", boxHeight / 2)
+    .attr("dy", "0.35em")
+    .style("text-anchor", "middle")
+    .style("alignment-baseline", "middle")
+    .style("font-family", "'Pokemon GB' ,'sans-serif'")
+    .text(function (d) { return d; }); // Display the generation number
 
-          var genNumber = genBox.attr("id");
-          node.style("fill-opacity", function (nodeData) {
-              return nodeData.generation === +genNumber ? 1 : 0.3;
-          });
-          
-          generationBoxes.classed("selected", false);
-          genBox.classed("selected", true);
+  generationBoxes.on("click", function (event, d) {
+    var genBox = d3.select(this); 
+    var isSelected = genBox.classed("selected");
 
-          filterScatter(genNumber);
-          console.log(genNumber);
+    generationBoxes.selectAll(".generation-box").style("opacity", 0.5);
 
-      } else {
-          // Reset settings
-          node.style("fill-opacity", 0.8);
-          genBox.classed("selected", false);
-      }
-    });
+    if (!isSelected) {
+      genBox.selectAll(".generation-box").style("opacity", 1);
+
+      var genNumber = genBox.attr("id");
+      node.style("fill-opacity", function (nodeData) {
+        return nodeData.generation === +genNumber ? 1 : 0.3;
+      });
+
+      generationBoxes.classed("selected", false);
+      genBox.classed("selected", true);
+
+      filterScatter(genNumber);
+      console.log(genNumber);
+    } else {
+      // Reset settings
+      node.style("fill-opacity", 0.8);
+      generationBoxes.classed("selected", false);
+    }
+  });
+
   
-
   var types = [...new Set(data.flatMap(d => [d.type1, d.type2].filter(t => t !== '' && t !== undefined)))];
 
   // Create an array of unique generations (1-7)
@@ -314,7 +327,6 @@ function draw_scatter(data) {
   // Scale and axis setup
   var x = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.weight)])
-    // .domain([0, 1000])
     .range([0, scatterWidth - 200 ]);
 
   var xaxis = scatterG.append("g")
@@ -370,10 +382,10 @@ function draw_scatter(data) {
     .attr("width", 1)
     .attr("height", 1);
 
-    console.log(patterns);  
+  console.log(patterns);  
 
-    patterns.on("load", function () {
-      legendBox.style("fill", function (d, i) { return "url(#pattern-" + i + ")"; });
+  patterns.on("load", function () {
+    legendBox.style("fill", function (d, i) { return "url(#pattern-" + i + ")"; });
     });
 
   // Add brushing and zooming(Added before tooltip to prevent tooltip from being covered)
