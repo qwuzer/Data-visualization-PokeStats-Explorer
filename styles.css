@@ -8,6 +8,14 @@ body.lock-scroll {
     overflow: hidden;
 }
 
+@font-face {
+    font-family: 'Pokemon GB'; /* Choose a custom name for your font */
+    src: url('/Pokemon\ GB.ttf') format('truetype'); /* Replace 'path/to' with the actual path to your TTF file */
+    font-weight: normal; /* Specify the font weight if needed */
+    font-style: normal; /* Specify the font style if needed */
+  }
+  
+  
 /* html, body {margin: 0; height: 100%; overflow: hidden}  */
 
 /* Set initial display property for the divs */
@@ -46,7 +54,7 @@ body {
     z-index: 1;
     font-weight: 400;
     font-size: 16px; /* Adjust the font size to make the text larger */
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
     padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
     border: none; /* Specify a border style along with the color */
@@ -60,7 +68,7 @@ body {
     left: 50px;
     font-weight: 400;
     font-size: 16px; /* Adjust the font size to make the text larger */
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
     padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
     border: none; /* Specify a border style along with the color */
@@ -75,7 +83,7 @@ body {
     left: 50px;
     font-weight: 400;
     font-size: 16px; /* Adjust the font size to make the text larger */
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
     padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
     border: none; /* Specify a border style along with the color */
@@ -90,7 +98,7 @@ body {
     left: 50px;
     font-weight: 400;
     font-size: 16px; /* Adjust the font size to make the text larger */
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
     padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
     border: none; /* Specify a border style along with the color */
@@ -111,7 +119,7 @@ body {
     position: absolute;
     top: 650px; /* 调整上边距 */
     left:150px;
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -143,7 +151,7 @@ body {
     position: absolute;
     top: 1650px; /* 调整上边距 */
     left:150px;
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -175,7 +183,7 @@ body {
     position: absolute;
     top: 2650px; /* 调整上边距 */
     left:150px;
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -207,7 +215,7 @@ body {
     position: absolute;
     top: 3650px; /* 调整上边距 */
     left:150px;
-    font-family: 'Pokemon Solid', sans-serif;
+    font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
