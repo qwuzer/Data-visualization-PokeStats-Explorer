@@ -1,10 +1,10 @@
-// function disableScroll() {
-//   document.body.style.overflow = 'hidden';
-// }
+function disableScroll() {
+  document.body.style.overflow = 'hidden';
+}
 
-// document.addEventListener('DOMContentLoaded', function () {
-//   disableScroll();
-// });
+document.addEventListener('DOMContentLoaded', function () {
+  disableScroll();
+});
 
 function scrollToView(targetId) {
   console.log("hi");
@@ -282,7 +282,7 @@ var scattersvg = d3.select("#scatter")
   .append("svg")
   .attr("width", scatterWidth + margin.left + margin.right)
   .attr("height", scatterHeight + margin.top + margin.bottom)
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  .attr("transform", "translate(" + 500  + "," + margin.top + ")");
 
 var scatterG =  scattersvg.append("g")
   .attr("width", scatterWidth - 200 )
@@ -348,7 +348,7 @@ function draw_scatter(data , generation) {
     .data(label_data) 
     .enter().append("g")
     .attr("class", "legend")
-    .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+    .attr("transform", function (d, i) { return "translate(0," + i * 30 + ")"; });
 
   // Add legend text
   legend.append("text")
@@ -363,8 +363,8 @@ function draw_scatter(data , generation) {
   // Draw legend color blocks
   var legendBoxes = legend.append("rect")
     .attr("x", scatterWidth + margin.right - 38)
-    .attr("width", 18)
-    .attr("height", 18)
+    .attr("width", 30)
+    .attr("height", 30)
     .attr("type", d => d)
     
     
