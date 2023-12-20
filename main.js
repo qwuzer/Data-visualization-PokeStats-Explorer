@@ -387,6 +387,8 @@ function draw_scatter(data , generation) {
       console.log(selectedType);
       console.log(generation);
       
+      updateStackbar(selectedType, generation);
+      updateMenu(selectedType, generation);
 
 
     } else {
@@ -525,11 +527,23 @@ var svg_stackbar = d3.select("#stackbar")
     .attr("height", height)
     .style("position", "relative")            
     .style("left", "350px");       
+
+function updateStackbar( type , generation ){
+  console.log(type);
+  console.log(generation);
   d3.csv("All_Pokemon.csv").then(function(data) {
     // Filter and map the CSV data to the desired format
     var pokemonData = data
         .filter(function(d) {
-            return d.Generation == 1 && (d.Type1 == "Poison" || d.Type2 == "Poison");
+          // Convert Generation to integer for comparison
+          var gen = parseInt(d.Generation);
+          
+          // Adjust case for Type
+          var type1 = d.Type1.toLowerCase();
+          var type2 = d.Type2 ? d.Type2.toLowerCase() : null;
+
+          return gen === +generation && (type1 === type || type2 === type);
+              // return +d.Generation === +generation  && (d.Type1 === type || d.Type2 === type);
         })
         .map(function(d) {
             return {
@@ -543,10 +557,13 @@ var svg_stackbar = d3.select("#stackbar")
                 speed: +d.Spe
             };
         });
+
+      console.log(pokemonData);
   
     // Now pokemonData is in the desired format
     draw_stackbar(pokemonData,pokemonData);
-});
+  });
+}
 
 var clickedKey="null";
 // Set up chart dimensions
@@ -989,16 +1006,22 @@ function evolution(evolutionInfo,evolutionIndex)
 /* --------------------------------------------------------------------------------------------------------*/
 /* ----------------------------------------------UpdateMenu------------------------------------------------*/
 /* --------------------------------------------------------------------------------------------------------*/
-updateMenu("Dragon",3);
+// updateMenu("Dragon",3);
 function updateMenu(type,generation)
 {
   console.log(type+generation);
   d3.csv("All_Pokemon.csv").then(function(data)
   {
     // 選擇下拉式選單
-        var filteredData = data.filter(function (d) {
-          return (d.Type1 === type|| d.Type2 === type) && +d.Generation === +generation; // 使用+将字符串转换为数字
-        });
+    var filteredData = data.filter(function (d) {
+      // Convert Type1 and Type2 to lowercase for case-insensitive comparison
+      var type1 = d.Type1.toLowerCase();
+      var type2 = d.Type2 ? d.Type2.toLowerCase() : null;
+    
+      // Compare lowercase Type values and convert Generation to integer
+      return (type1 === type.toLowerCase() || type2 === type.toLowerCase()) && +d.Generation === +generation;
+    });
+    
         console.log(filteredData);
         var selectMenu = d3.select("#dropdown")
         .on("change", function() {
