@@ -282,7 +282,7 @@ var scattersvg = d3.select("#scatter")
   .append("svg")
   .attr("width", 1200)
   .attr("height", 1000)
-  .attr("transform", "translate(" + 450  + "," + margin.top + 0.7 +  ")");
+  .attr("transform", "translate(" + 450  + "," + margin.top  +  ")");
 
 var scatterG =  scattersvg.append("g")
   .attr("width", scatterWidth - 200 )
@@ -308,7 +308,8 @@ function filterScatter( generation ) {
             };
         });
       
-        console.log(scatterData);
+    console.log(generation)
+
     draw_scatter(scatterData , generation);
 
   });
@@ -386,9 +387,11 @@ function draw_scatter(data , generation) {
       var selectedType = legendBox.attr("type");
 
       //highlight the selected type of dots
-      scatterG.selectAll(".dot")
-        .style("fill", function (d) { return ((d.type1 === selectedType) || (d.type2 === selectedType)) ? typeColorMap[d.type1] : "lightgray"; });
+      // scatterG.selectAll(".dot")
+      //   .style("fill", function (d) { return ((d.type1 === selectedType) || (d.type2 === selectedType)) ? typeColorMap[d.type1] : "lightgray"; });
       
+      console.log(generation)
+      console.log(selectedType)
       updateStackbar(selectedType, generation);
       updateMenu(selectedType, generation);
 
