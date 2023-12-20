@@ -134,7 +134,6 @@ d3.csv("data.csv").then(function (data) {
     });
   });
 
-  //console.log(result);
 
   // Extracting type names for the color scale domain
   var typeNames = [...new Set(result.map(d => d.type))];
@@ -304,17 +303,18 @@ function filterScatter( generation ) {
                 type1: d.Type1.toLowerCase(),
                 name: d.Name,
                 number: d.Number,
-                bmi: d.BMI
+                bmi: d.BMI,
+                generation: +d.Generation
             };
         });
       
         console.log(scatterData);
-    draw_scatter(scatterData);
+    draw_scatter(scatterData , generation);
 
   });
 }
 
-function draw_scatter(data) {
+function draw_scatter(data , generation) {
   scatterG.selectAll("*").remove();
 
   var typeColorMap = {};
@@ -341,8 +341,9 @@ function draw_scatter(data) {
     .attr("transform", "translate(20,0)")
     .call(d3.axisLeft(y));
 
-  // Add legend
+
   var label_data = Array.from(new Set(data.map(d => d.type1)));
+
   var legend = scattersvg.selectAll(".legend")
     .data(label_data) 
     .enter().append("g")
@@ -354,23 +355,56 @@ function draw_scatter(data) {
     .attr("x", scatterWidth - margin.right - 44)
     .attr("y", 9)
     .attr("dy", ".35em")
+    .attr("font-size", "13px")
     .style("text-anchor", "end")
+    .style("font-family", "'Pokemon GB' ,'sans-serif'")
     .text(d => d);
 
   // Draw legend color blocks
-  var legendBox = legend.append("rect")
+  var legendBoxes = legend.append("rect")
     .attr("x", scatterWidth + margin.right - 38)
     .attr("width", 18)
     .attr("height", 18)
+    .attr("type", d => d)
+    
+    
+  
+  legendBoxes.on("click", function (event, d) {
+    var legendBox = d3.select(this);
+    var isSelected = legendBox.classed("selected");
+  
+    // Reset opacity for all legend boxes
+    legend.selectAll("rect").style("opacity", 1);
+    
+    if (!isSelected) {
+      legend.selectAll("rect").style("opacity", 0.5);
+      legendBox.style("opacity", 1);
 
+      legend.classed("selected", false);
+      legendBox.classed("selected", true);
+      
+      var selectedType = legendBox.attr("type");
+      console.log(selectedType);
+      console.log(generation);
+      
+      
+
+    } else {
+      // legendBox.style("opacity", 0.8);
+      legendBox.classed("selected", false);
+    }
+  });
+    
+
+    
   console.log(label_data)
-  // Image patterns for legend
-  var patterns = scattersvg.append("defs")
+  // Append patterns for each image in the scatter chart
+  var scatterPatterns = scattersvg.append("defs")
     .selectAll("pattern")
     .data(label_data)
     .enter()
     .append("pattern")
-    .attr("id", function (d, i) { return "pattern-" + i; })
+    .attr("id", function (d, i) { return "scatter-pattern-" + i; })
     .attr("width", 1)
     .attr("height", 1)
     .attr("patternContentUnits", "objectBoundingBox")
@@ -382,22 +416,22 @@ function draw_scatter(data) {
     .attr("width", 1)
     .attr("height", 1);
 
-  console.log(patterns);  
+  scatterPatterns.on("load", function () {
+    // Apply patterns to the legendBox in the scatter chart
+    legendBoxes.style("fill", function (d, i) { return "url(#scatter-pattern-" + i + ")"; });
+  });
 
-  patterns.on("load", function () {
-    legendBox.style("fill", function (d, i) { return "url(#pattern-" + i + ")"; });
-    });
 
   // Add brushing and zooming(Added before tooltip to prevent tooltip from being covered)
   var brush = d3.brush()
     .extent([[20,0], [scatterWidth - 200 + 20 , scatterHeight - 50]])
     .on("end", updateChart);
-  
 
   scatterG.append("g")
     .attr("class", "brush")
     .call(brush);
 
+  console.log(data)
   // Draw points
   var dots = scatterG.selectAll(".dot")
     .data(data)
@@ -407,10 +441,12 @@ function draw_scatter(data) {
     .attr("cx", d => x(d.weight) + 20 )
     .attr("cy", d => y(d.height) )
     .attr("name", d => d.Number)
-    .style("fill", d => typeColorMap[d["type1"]])
+    // .style("fill", function (d, i) { return "url(#scatter-pattern-" + i + ")"; })
+    .style("fill", d => typeColorMap[d.type1])
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
+
 
   var idleTimeout;
   function idled() {
@@ -425,25 +461,29 @@ function draw_scatter(data) {
       if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows waiting a little bit
         x.domain([0, d3.max(data, d => d.weight)]); // Adjust this domain based on your data
         y.domain([0, d3.max(data, d => d.height)]); // Adjust this domain based on your data
-            // Update axis and circle position
-        xaxis.transition().duration(1000).call(d3.axisBottom(x));
-        yaxis.transition().duration(1000).call(d3.axisLeft(y));
-        scatterG.selectAll(".dot")
-          .transition().duration(1000)
-          .attr("cx", function (d) { return x(d.weight)  + 20; })
-          .attr("cy", function (d) { return y(d.height) ; });
+        // updateLegend(data);
     } else {
       x.domain([x.invert(extent[0][0]), x.invert(extent[1][0])]);
       y.domain([y.invert(extent[1][1]), y.invert(extent[0][1])]);
       scatterG.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
-      // Update axis and circle position
-      xaxis.transition().duration(1000).call(d3.axisBottom(x));
-      yaxis.transition().duration(1000).call(d3.axisLeft(y));
-      scatterG.selectAll(".dot")
-        .transition().duration(1000)
-        .attr("cx", function (d) { return x(d.weight) +  200; })
-        .attr("cy", function (d) { return y(d.height) ; });
+      // var brushedData = data.filter(function (d) {
+      //   var cx = x(d.weight) + 200; // Adjust the x-coordinate based on your layout
+      //   var cy = y(d.height);
+      //   return extent[0][0] <= cx && cx <= extent[1][0] && extent[0][1] <= cy && cy <= extent[1][1];
+      // });
+      // console.log(brushedData);
+  
+      // Update the legend based on the brushed data
+      // updateLegend(brushedData);
+  
     }
+
+    xaxis.transition().duration(1000).call(d3.axisBottom(x));
+    yaxis.transition().duration(1000).call(d3.axisLeft(y));
+    scatterG.selectAll(".dot")
+      .transition().duration(1000)
+      .attr("cx", function (d) { return x(d.weight)  + 20; })
+      .attr("cy", function (d) { return y(d.height) ; });
   }
 
   function mouseover(event, d) {
@@ -455,9 +495,15 @@ function draw_scatter(data) {
     var tooltipOffsetX = 20;
     var tooltipOffsetY = 10;
     Tooltip
-      .html(d.name + '<br>' +  " Weight: " + d.weight + "kg" +  ' Height: ' + d.height + "m" + '<br>' + " BMI: " + d.bmi)
-      .style("left", (event.pageX + tooltipOffsetX) + "px")
-      .style("top", (event.pageY - tooltipOffsetY) + "px");
+    .html(d.name + '<br>' +
+        ' Weight: ' + d.weight + 'kg' +
+        ' Height: ' + d.height + 'm' +
+        '<br> BMI: ' + d.bmi +
+        '<div><img src="images/' + d.name.toLowerCase() + '.png" alt="Description width="100px" height="100px" ><img src="png/' + d.type1.toLowerCase() + '.png" alt="Description"  width="50px" height="50px"></div>' +
+        '<div></div>'
+    )
+    .style("left", (event.pageX + tooltipOffsetX) + "px")
+    .style("top", (event.pageY - tooltipOffsetY) + "px");
   }
 
   function mouseleave(event, d) {
@@ -478,7 +524,7 @@ var svg_stackbar = d3.select("#stackbar")
     .attr("width", width)
     .attr("height", height);
    
-  d3.csv("All_Pokemon.csv").then(function(data) {
+d3.csv("All_Pokemon.csv").then(function(data) {
     // Filter and map the CSV data to the desired format
     var pokemonData = data
         .filter(function(d) {
