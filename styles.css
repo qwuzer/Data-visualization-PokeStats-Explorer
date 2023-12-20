@@ -152,7 +152,7 @@ body {
 #Chart2_content {
     position: absolute;
     top: 1640px; /* 调整上边距 */
-    left:90px;
+    left:60px;
     font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
@@ -172,7 +172,7 @@ body {
     position: absolute;
     transform: scale(3);
     top: 1680px;
-    left: 330px;
+    left: 290px;
     z-index: 1;
 }
 #Chart3_title {

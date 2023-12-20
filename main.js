@@ -280,9 +280,9 @@ var margin = { top: 10, right: 10, bottom: 30, left: 30 };
 
 var scattersvg = d3.select("#scatter")
   .append("svg")
-  .attr("width", scatterWidth + margin.left + margin.right)
-  .attr("height", scatterHeight + margin.top + margin.bottom)
-  .attr("transform", "translate(" + 500  + "," + margin.top + ")");
+  .attr("width", 1200)
+  .attr("height", 1000)
+  .attr("transform", "translate(" + 450  + "," + margin.top + 0.7 +  ")");
 
 var scatterG =  scattersvg.append("g")
   .attr("width", scatterWidth - 200 )
@@ -352,17 +352,17 @@ function draw_scatter(data , generation) {
 
   // Add legend text
   legend.append("text")
-    .attr("x", scatterWidth - margin.right - 44)
+    .attr("x", scatterWidth - margin.right - 94)
     .attr("y", 9)
     .attr("dy", ".35em")
-    .attr("font-size", "13px")
+    .attr("font-size", "10px")
     .style("text-anchor", "end")
     .style("font-family", "'Pokemon GB' ,'sans-serif'")
     .text(d => d);
 
   // Draw legend color blocks
   var legendBoxes = legend.append("rect")
-    .attr("x", scatterWidth + margin.right - 38)
+    .attr("x", scatterWidth + margin.right - 98)
     .attr("width", 30)
     .attr("height", 30)
     .attr("type", d => d)
@@ -382,10 +382,12 @@ function draw_scatter(data , generation) {
 
       legend.classed("selected", false);
       legendBox.classed("selected", true);
-      
+
       var selectedType = legendBox.attr("type");
-      console.log(selectedType);
-      console.log(generation);
+
+      //highlight the selected type of dots
+      scatterG.selectAll(".dot")
+        .style("fill", function (d) { return ((d.type1 === selectedType) || (d.type2 === selectedType)) ? typeColorMap[d.type1] : "lightgray"; });
       
       updateStackbar(selectedType, generation);
       updateMenu(selectedType, generation);
@@ -468,15 +470,6 @@ function draw_scatter(data , generation) {
       x.domain([x.invert(extent[0][0]), x.invert(extent[1][0])]);
       y.domain([y.invert(extent[1][1]), y.invert(extent[0][1])]);
       scatterG.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
-      // var brushedData = data.filter(function (d) {
-      //   var cx = x(d.weight) + 200; // Adjust the x-coordinate based on your layout
-      //   var cy = y(d.height);
-      //   return extent[0][0] <= cx && cx <= extent[1][0] && extent[0][1] <= cy && cy <= extent[1][1];
-      // });
-      // console.log(brushedData);
-  
-      // Update the legend based on the brushed data
-      // updateLegend(brushedData);
   
     }
 
