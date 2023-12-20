@@ -1,13 +1,21 @@
 /* styles.css */
-
+/* 
 html {
     scroll-behavior: smooth;
 }
 
 body.lock-scroll {
     overflow: hidden;
-}
+} */
 
+@font-face {
+    font-family: 'Pokemon GB'; /* Choose a custom name for your font */
+    src: url('/Pokemon\ GB.ttf') format('truetype'); /* Replace 'path/to' with the actual path to your TTF file */
+    font-weight: normal; /* Specify the font weight if needed */
+    font-style: normal; /* Specify the font style if needed */
+}
+  
+  
 /* html, body {margin: 0; height: 100%; overflow: hidden}  */
 
 /* Set initial display property for the divs */
@@ -15,13 +23,6 @@ body.lock-scroll {
 #scatter,
 #stackbar {
     display: none;
-} */
-
-/* body {
-    margin: 0; 
-    background-size: cover;
-    background-position: center;
-    background-image: url('bg.png'); 
 } */
 
 body {
@@ -33,26 +34,38 @@ body {
     background: linear-gradient(rgba(255, 248, 230, 0.5), rgba(255, 248, 230, 0.5)), url("bg.png");
     font-family: 'Raleway', Helvetica, Arial, sans-serif;
     background-size: cover;
-    min-width: 100vw; /* 设置最小宽度为视口宽度 */
-    min-height: 100vh; /* 设置最小高度为视口高度 */
+    min-width: 100vw; 
+    min-height: 100vh;
+}
+
+.chart {
+    height: 100vh;
 }
 
 
+.chart-header {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
 #circular_packing button {
-    /* background-image: url('bg.png'); */
+
     position: absolute;
     top: 50px;
     left: 50px;
     z-index: 1;
     font-weight: 400;
-    font-size: 16px; /* Adjust the font size to make the text larger */
-    font-family: 'Pokemon Solid', sans-serif;
-    border-radius: 10px; /* Increase the border-radius for a more rounded appearance */
-    padding: 8px 24px; /* Adjust the padding to increase the overall size of the button */
-    border: none; /* Specify a border style along with the color */
+    font-size: 16px; 
+    font-family: 'Pokemon GB', sans-serif;
+    border-radius: 10px;
+    padding: 8px 24px; 
+    border: none; 
     background-color: blue;
     color: white;
 }
+
+
 #scatter button {
     /* background-image: url('bg.png'); */
     position: absolute;
