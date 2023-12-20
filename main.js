@@ -1040,9 +1040,7 @@ function updateMenu(type,generation)
         draw_radar(selectedName);
         updateImages(selectedName);
         });
-        selectMenu.style("position", "absolute")
-              .style("left", "750px")
-              .style("top", "3100px");
+
 
       // 使用 Map 來存儲每個 Number 的第一筆資料
         var firstDataMap = new Map();
