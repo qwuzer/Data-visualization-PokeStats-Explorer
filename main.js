@@ -476,8 +476,9 @@ function draw_scatter(data) {
 var svg_stackbar = d3.select("#stackbar")
     .append("svg")
     .attr("width", width)
-    .attr("height", height);
-   
+    .attr("height", height)
+    .style("position", "relative")            
+    .style("left", "350px");       
   d3.csv("All_Pokemon.csv").then(function(data) {
     // Filter and map the CSV data to the desired format
     var pokemonData = data
@@ -538,18 +539,32 @@ var color = function(d) { return colorScale(d.key); };
 var barchart = svg_stackbar.selectAll("g")
     .data(stackedData)
     .enter().append("g")
-    .attr("fill",color)
+    .attr("fill", color)
     .selectAll("bar_rect")
     .data(function (d) { return d; })
     .enter().append("rect")
-    .attr("class","bar_rect")
+    .attr("class", "bar_rect")
     .attr("x", function (d) { return x(d.data.name); })
     .attr("width", x.bandwidth())
     .attr("transform", "translate(50,100)")
-    .attr("height",0)
-    .attr("y", function (d) { return y(d[0]); }) // 修改这里
-    .transition() // 添加过渡效果
-    .duration(1000) // 过渡时间，单位毫秒
+    .attr("height", 0)
+    .attr("y", function (d) { return y(d[0]); })
+    .on("mouseover", function (event, d) {
+        Tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        Tooltip.html("Name: " + d.data.name+
+        "<div><img src='images/" +d.data.name.toLowerCase() + ".png' alt='Description'></div>")
+            .style("left", (event.pageX) + "px")
+            .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseleave", function (d) {
+        Tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+    })
+    .transition()
+    .duration(1000)
     .attr("height", function (d) { return y(d[0]) - y(d[1]); })
     .attr("y", function (d) { return y(d[1]); });
 
@@ -647,7 +662,10 @@ function draw_new_barchart(pokemonData,pokemonData_reserve)
 var radarsvg = d3.select("#radar")
     .append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height)
+    .style("position", "relative")       
+    .style("left", "350px")
+    .style("top", "-100px");
 
 
 function draw_radar(name)
@@ -835,17 +853,27 @@ d3.csv("All_Pokemon.csv").then(function (data) {
   }
 
   let dataCoordinates = dataToCoordinates(radatData[0]);
-
-  radatData.forEach(function (d) {
-      //console.log(d.name, d.hp, d.attack, d.defense, d.sp_attack, d.sp_defense, d.speed, d.total);
-  });
-
+  var myData = {
+    name: "Rayquaza",
+    hp: 105,
+    attack: 150,
+    defense: 90,
+    sp_attack: 150,
+    sp_defense: 90,
+    speed: 95,
+  };
+  let mydataCoordinates = dataToCoordinates(myData);
+  radarsvg.append("polygon")
+    .attr("points", mydataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
+    .attr("stroke", "blue") // Adjust the stroke color
+    .attr("fill", "black") // Adjust the fill color
+    .attr("opacity", 0.5); // Adjust the opacity
     // Draw the radar chart using the dataCoordinates
   radarsvg.append("polygon")
     .attr("points", dataCoordinates.map((coord) => coord.x + "," + coord.y).join(" "))
     .attr("stroke", "blue") // Adjust the stroke color
     .attr("fill", fillColor) // Adjust the fill color
-    .attr("opacity", 0.6); // Adjust the opacity
+    .attr("opacity", 0.7); // Adjust the opacity
 });
 
   });
@@ -915,7 +943,7 @@ function evolution(evolutionInfo,evolutionIndex)
 /* --------------------------------------------------------------------------------------------------------*/
 /* ----------------------------------------------UpdateMenu------------------------------------------------*/
 /* --------------------------------------------------------------------------------------------------------*/
-updateMenu("Grass",1);
+updateMenu("Dragon",3);
 function updateMenu(type,generation)
 {
   console.log(type+generation);
@@ -923,7 +951,7 @@ function updateMenu(type,generation)
   {
     // 選擇下拉式選單
         var filteredData = data.filter(function (d) {
-          return d.Type1 === type && +d.Generation === +generation; // 使用+将字符串转换为数字
+          return (d.Type1 === type|| d.Type2 === type) && +d.Generation === +generation; // 使用+将字符串转换为数字
         });
         console.log(filteredData);
         var selectMenu = d3.select("#dropdown")
@@ -944,7 +972,7 @@ function updateMenu(type,generation)
         updateImages(selectedName);
         });
         selectMenu.style("position", "absolute")
-              .style("left", "0px")
+              .style("left", "750px")
               .style("top", "3100px");
 
       // 使用 Map 來存儲每個 Number 的第一筆資料

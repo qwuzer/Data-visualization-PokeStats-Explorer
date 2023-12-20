@@ -109,7 +109,7 @@ body {
 #Chart1_title {
     position: absolute;
     top: 250px; /* 调整上边距 */
-    left:50px;
+    left:200px;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -129,19 +129,19 @@ body {
 #Chart1_professor{
     position: absolute;
     top: 350px;
-    left: 250px;
+    left: 350px;
 }
 #Chart1_conversation{
     position: absolute;
     transform: scale(3);
-    top: 500px;
-    left: 150px;
+    top: 680px;
+    left: 330px;
     z-index: 1;
 }
 #Chart2_title {
     position: absolute;
     top: 1250px; /* 调整上边距 */
-    left:50px;
+    left:200px;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -161,19 +161,19 @@ body {
 #Chart2_professor{
     position: absolute;
     top: 1350px;
-    left: 250px;
+    left: 350px;
 }
 #Chart2_conversation{
     position: absolute;
     transform: scale(3);
-    top: 1500px;
-    left: 150px;
+    top: 1680px;
+    left: 330px;
     z-index: 1;
 }
 #Chart3_title {
     position: absolute;
     top: 2250px; /* 调整上边距 */
-    left:50px;
+    left:200px;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -193,19 +193,19 @@ body {
 #Chart3_professor{
     position: absolute;
     top: 2350px;
-    left: 250px;
+    left: 350px;
 }
 #Chart3_conversation{
     position: absolute;
     transform: scale(3);
-    top: 2500px;
-    left: 150px;
+    top: 2680px;
+    left: 330px;
     z-index: 1;
 }
 #Chart4_title {
     position: absolute;
     top: 3250px; /* 调整上边距 */
-    left:50px;
+    left:200px;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -225,16 +225,25 @@ body {
 #Chart4_professor{
     position: absolute;
     top: 3350px;
-    left: 250px;
+    left: 350px;
 }
 #Chart4_conversation{
     position: absolute;
     transform: scale(3);
-    top: 3500px;
-    left: 150px;
+    top: 3680px;
+    left: 330px;
     z-index: 1;
 }
 #dropdown{
     z-index: 5;
+    
+
+}
+#myPokemon{
+    position: absolute;
+    transform: scale(3);
+    top: 3650px;
+    left: 1700px;
+    z-index: 1;
 }
 
