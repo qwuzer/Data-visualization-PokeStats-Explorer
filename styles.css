@@ -117,14 +117,16 @@ body {
 }
 #Chart1_content {
     position: absolute;
-    top: 650px; /* 调整上边距 */
-    left:150px;
+    top: 640px; /* 调整上边距 */
+    left:100px;
     font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
     padding: 20px; /* 添加一些内边距 */
     z-index: 2;
+    line-height: 1.5;
+    text-align: left;
 }
 #Chart1_professor{
     position: absolute;
@@ -141,7 +143,7 @@ body {
 #Chart2_title {
     position: absolute;
     top: 1250px; /* 调整上边距 */
-    left:200px;
+    left:150px;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -149,14 +151,17 @@ body {
 }
 #Chart2_content {
     position: absolute;
-    top: 1650px; /* 调整上边距 */
-    left:150px;
+    top: 1640px; /* 调整上边距 */
+    left:90px;
     font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
     padding: 20px; /* 添加一些内边距 */
     z-index: 2;
+    line-height: 1.5;
+    text-align: left;
+    font-size: 14px;
 }
 #Chart2_professor{
     position: absolute;
@@ -173,7 +178,7 @@ body {
 #Chart3_title {
     position: absolute;
     top: 2250px; /* 调整上边距 */
-    left:200px;
+    left:250px;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
@@ -181,14 +186,16 @@ body {
 }
 #Chart3_content {
     position: absolute;
-    top: 2650px; /* 调整上边距 */
-    left:150px;
+    top: 2630px; /* 调整上边距 */
+    left:100px;
     font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
     padding: 20px; /* 添加一些内边距 */
     z-index: 2;
+    line-height: 1.5;
+    text-align: left;
 }
 #Chart3_professor{
     position: absolute;
@@ -214,13 +221,15 @@ body {
 #Chart4_content {
     position: absolute;
     top: 3650px; /* 调整上边距 */
-    left:150px;
+    left:100px;
     font-family: 'Pokemon GB', sans-serif;
     /*left: 50%; /* 将 left 设置为 50%，使其居中 */
     /*transform: translateX(-50%); /* 使用 transform 来根据自身宽度的一半向左平移，实现水平居中 */
     text-align: center; /* 文字居中 */
     padding: 20px; /* 添加一些内边距 */
     z-index: 2;
+    line-height: 1.5;
+    text-align: left;
 }
 #Chart4_professor{
     position: absolute;
@@ -236,8 +245,9 @@ body {
 }
 #dropdown{
     z-index: 5;
-    
-
+    position: absolute;
+    top: 3100px;
+    left: 750px;
 }
 #myPokemon{
     position: absolute;
