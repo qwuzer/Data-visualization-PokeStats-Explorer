@@ -27,9 +27,9 @@ Clicking the label above the chart will highlight the selected generation.
 After selecting the generation, clicking the Next button on the top-left corner will lead to the second chart.
 
 ### Second chart: Scatter plot
-X-axis: The values on the x-axis can show the weight(kg) of the pokemon.
-Y-axis: The values on the y-axis can show the height(m) of the pokemon.
-Color: The color of the point can show the type of the pokemon.
+- X-axis: The values on the x-axis can show the weight(kg) of the pokemon.
+- Y-axis: The values on the y-axis can show the height(m) of the pokemon.
+- Color: The color of the point can show the type of the pokemon.
 
 - Interactions:
 Brushing the area of the plot can zoom in on the region that has been brushed.
@@ -39,8 +39,8 @@ Hovering over a point can reveal the name, weight, height, and BMI of the Pokém
 Clicking Next will lead to the third chart.
 
 ### Third chart: Stack bar chart
-X-axis: The values on the x-axis can display all Pokémon from the specific generation and type selected by the user.
-Y-axis: The values on the y-axis can display the values of the BST (Base Stat Total).
+- X-axis: The values on the x-axis can display all Pokémon from the specific generation and type selected by the user.
+- Y-axis: The values on the y-axis can display the values of the BST (Base Stat Total).
 
 - Base Stat Total: 
 The sum of the Pokémon's HP (Hit Points), Att (Attack), Def (Defense), Spa (Special Attack), Spd (Special Defense), and Spe (Speed) would give us the Base Stat Total (BST) for that Pokémon. 
