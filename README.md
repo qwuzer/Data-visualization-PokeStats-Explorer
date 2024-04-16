@@ -25,6 +25,8 @@ Hovering over a Bubble reveals the number of Pokémons in that bubble, type, and
 Clicking on the bubble will highlight the other bubbles with the same type.
 Clicking the label above the chart will highlight the selected generation.
 After selecting the generation, clicking the Next button on the top-left corner will lead to the second chart.
+![截圖 2024-04-16 中午12 37 13](https://github.com/qwuzer/Data-visualization-PokeStats-Explorer/assets/53393045/1f9d81a4-41c0-4d66-8ded-31f3deeb2cde)
+![截圖 2024-04-16 中午12 37 19](https://github.com/qwuzer/Data-visualization-PokeStats-Explorer/assets/53393045/0b7db831-7ac1-41f2-8729-f1a82d3fb108)
 
 ### Second chart: Scatter plot
 - X-axis: The values on the x-axis can show the weight(kg) of the pokemon.
@@ -37,6 +39,7 @@ Double-clicking on the area of the scatter plot can cancel the zoom-in.
 Clicking on the label image on the right side will filter the data with that selected type
 Hovering over a point can reveal the name, weight, height, and BMI of the Pokémon.
 Clicking Next will lead to the third chart.
+![截圖 2024-04-16 中午12 37 25](https://github.com/qwuzer/Data-visualization-PokeStats-Explorer/assets/53393045/b09e9ae6-f23c-4847-8537-666b4f930f36)
 
 ### Third chart: Stack bar chart
 - X-axis: The values on the x-axis can display all Pokémon from the specific generation and type selected by the user.
@@ -50,6 +53,8 @@ The Base Stat Total is a measure commonly used by players to evaluate the overal
 Hovering over the stack bar can reveal the name and image of the Pokémon.
 Clicking the label on the right side will display a bar chart for a specific attribute.
 Clicking Next will lead to the fourth chart.
+![截圖 2024-04-16 中午12 37 33](https://github.com/qwuzer/Data-visualization-PokeStats-Explorer/assets/53393045/197791bb-3227-4f47-9bb4-42942bea1c64)
+![截圖 2024-04-16 中午12 38 32](https://github.com/qwuzer/Data-visualization-PokeStats-Explorer/assets/53393045/ab4de7b8-ce95-4693-b30c-0f39c0476f25)
 
 ### Fourth chart: Radar chart
 Displaying the image of the specific Pokémon selected via the dropdown, followed by a comparison of its stats with the Pokémon Tsai selected by using a radar chart.
@@ -59,7 +64,7 @@ The six features on the radar chart are the same as the previous stack bar chart
 Clicking on the dropdown menu allows users to select the Pokémon they want to compare.
 Clicking Evolution can display the evolutionary forms of the Pokémon selected by the user (if they exist).
 
-
+![截圖 2024-04-16 中午12 38 00](https://github.com/qwuzer/Data-visualization-PokeStats-Explorer/assets/53393045/d19c8bd1-07f7-4973-9588-1900f857c94a)
 
 
 
